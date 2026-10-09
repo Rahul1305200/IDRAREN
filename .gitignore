@@ -1,0 +1,9 @@
+# OS / editor cruft
+Thumbs.db
+desktop.ini
+.DS_Store
+*.swp
+
+# Local tooling
+.claude/
+node_modules/

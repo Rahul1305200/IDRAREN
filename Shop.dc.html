@@ -1,0 +1,2941 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js?v=20260913b"></script>
+<script src="./idraren.js?v=20261003nobg"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --idr-dark: #312F23;
+      --idr-ivory: #E8D8C8;
+      --idr-stone: #EDE6DE;
+      --idr-charcoal: #252522;
+      --idr-taupe: #A89F91;
+      /* Readable secondary text: --idr-taupe alone measures under 2.2:1 on
+         stone, far below the 4.5:1 minimum. Same hue, passes on both grounds. */
+      --idr-taupe-ink: #625A4F;
+      --idr-charcoal-08: rgba(37, 37, 34, 0.08);
+      --idr-ivory-70: rgba(232, 216, 200, 0.7);
+      --idr-ivory-65: rgba(232, 216, 200, 0.65);
+      --idr-ivory-40: rgba(232, 216, 200, 0.4);
+      --idr-ivory-12: rgba(232, 216, 200, 0.12);
+      --idr-ivory-10: rgba(232, 216, 200, 0.1);
+      --idr-ivory-92: rgba(232, 216, 200, 0.92);
+      --idr-inset: 48px;
+    }
+    html, body { margin: 0; padding: 0; background: var(--idr-stone); color: var(--idr-charcoal); }
+    /* Keep the document as the scroll owner. overflow must stay visible on
+       html/body — any non-visible axis makes the other compute to auto and
+       kills position:sticky (.shop-header + .shop-browse). */
+    html, body {
+      height: auto !important;
+      min-height: 100% !important;
+      overflow: visible !important;
+    }
+    #dc-root,
+    #dc-root > .sc-host {
+      height: auto !important;
+      min-height: 100% !important;
+      overflow: visible !important;
+    }
+    html {
+      scroll-padding-top: calc(var(--shop-header-h, 108px) + var(--shop-browse-h, 100px));
+    }
+    body { font-family: 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 500; letter-spacing: 0.005em; }
+    /* Root cause of the jump when leaving Collections: the sub-row lives in
+       the sticky browse bar, above the grid in flow. When it collapsed, Chrome's
+       scroll anchoring scrolled the page up by the same 42px to hold the grid
+       still, which dropped the page below the sticky threshold (the bar
+       unstuck and slid down), and holdHeightDuring then snapped the scroll
+       back two frames later. This page manages its own scroll position on
+       category and filter changes, so anchoring is switched off here. */
+    html { overflow-anchor: none; }
+    * { box-sizing: border-box; }
+    a { color: inherit; text-decoration: none; }
+    a:hover { opacity: 0.7; }
+    img { display: block; max-width: 100%; }
+    button { font: inherit; }
+
+    .idr-mark { display: inline-block; width: 138px; height: 52px; line-height: 0; vertical-align: middle; }
+    .idr-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .idr-mark.is-light img {
+      filter: invert(1) sepia(0.35) saturate(0.9) hue-rotate(-8deg) brightness(0.94);
+    }
+
+    /* Header brand: name only. The full logo lockup is reserved for the
+       homepage intro and the footer. Matches Home.dc.html. */
+    .idr-wordmark {
+      display: inline-block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(20px, 2vw, 28px);
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: inherit;
+      line-height: 1;
+      margin-right: -0.3em;
+      position: relative;
+      top: -0.1em;
+    }
+
+    html.idr-smooth { scroll-behavior: auto; }
+    html.idr-smooth body { overscroll-behavior-y: none; }
+
+    .shop-topbar {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 24px;
+      background: var(--idr-dark);
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--idr-ivory);
+    }
+
+    .shop-header {
+      padding: 28px var(--idr-inset);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center;
+      gap: 20px;
+      border-bottom: 1px solid var(--idr-charcoal-08);
+      background: var(--idr-stone);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .shop-header.is-fixed {
+      position: fixed !important;
+      left: 0;
+      right: 0;
+      top: 0;
+      width: 100%;
+    }
+    #shop-header-spacer,
+    #shop-browse-spacer {
+      display: block;
+      height: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .shop-nav,
+    .shop-utils {
+      font-size: 12px;
+            text-transform: uppercase;
+      font-weight: 500;
+      white-space: nowrap;
+      /* Client: the menu line should read lighter. Matches .hero-nav on Home. */
+      color: var(--idr-taupe-ink);
+    }
+    .shop-nav { letter-spacing: 0.2em; }
+    .shop-utils { letter-spacing: 0; }
+    .shop-nav a:hover,
+    .shop-utils a:hover,
+    .shop-utils button:hover { color: var(--idr-charcoal); }
+    .shop-nav {
+      display: flex;
+      gap: clamp(16px, 2vw, 28px);
+      align-items: center;
+      justify-content: center;
+    }
+    .shop-nav > a,
+    .shop-nav .nav-item > a {
+      display: inline-flex;
+      align-items: center;
+      line-height: 1;
+    }
+    .shop-utils {
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+    .shop-utils .search-open-btn,
+    .shop-utils .saved-link {
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 0;
+      margin: 0;
+    }
+    .shop-utils .search-open-btn svg,
+    .shop-utils .saved-icon {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+    .shop-utils .lang-toggle {
+      gap: 6px;
+      margin: 0;
+    }
+    .shop-utils .lang-toggle .lang-code.is-on {
+      margin-inline-end: -0.18em;
+    }
+    .shop-utils .info-menu-trigger,
+    .shop-utils > a:not(.saved-link) {
+      letter-spacing: 0.2em;
+      margin-inline-end: -0.2em;
+    }
+
+    .search-open-btn {
+      border: none;
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      cursor: pointer;
+    }
+    .search-open-btn:hover { opacity: 0.7; }
+
+    .lang-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0;
+      margin: 0;
+      border: none;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .lang-toggle:hover { opacity: 1; }
+    .lang-opt { position: relative; opacity: 0.42; transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+    .lang-opt.is-on { opacity: 1; }
+    .lang-opt.is-on::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: -4px;
+      height: 1px;
+      background: currentColor;
+    }
+    .lang-sep { display: none; }
+    .lang-toggle svg { flex-shrink: 0; opacity: 0.85; width: 19px; height: 19px; }
+    .lang-code { font-size: 11px; letter-spacing: 0.18em; opacity: 0; width: 0; overflow: hidden; transition: opacity 0.35s ease; }
+    .lang-code.is-on { opacity: 1; width: auto; }
+    .lang-copy {
+      transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1), transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    html.is-lang-switching .lang-copy {
+      opacity: 0;
+      transform: translate3d(0, 6px, 0);
+    }
+
+    .nav-item { position: relative; display: flex; align-items: center; }
+    .nav-panel {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translate(-50%, 6px);
+      z-index: 60;
+      width: max-content;
+      min-width: 420px;
+      max-width: min(520px, 92vw);
+      padding-top: 14px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.4s ease, visibility 0.35s;
+      white-space: normal;
+    }
+    .nav-panel::before {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      height: 14px;
+    }
+    .nav-panel-inner {
+      background: var(--idr-stone);
+      color: var(--idr-charcoal);
+      border: 1px solid var(--idr-charcoal-08);
+      padding: 22px 28px 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px 40px;
+    }
+    .nav-item:hover .nav-panel,
+    .nav-item:focus-within .nav-panel,
+    .nav-item.is-open .nav-panel {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translate(-50%, 0);
+    }
+    .nav-panel-col { display: flex; flex-direction: column; gap: 10px; }
+    .nav-panel-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 15px;
+      color: var(--idr-taupe);
+      margin-bottom: 2px;
+      text-transform: none;
+      letter-spacing: 0.02em;
+    }
+    .nav-panel a {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--idr-charcoal);
+      width: fit-content;
+      border-bottom: 1px solid transparent;
+      padding-bottom: 1px;
+    }
+    .nav-panel a:hover { opacity: 1; border-bottom-color: var(--idr-charcoal); }
+    .nav-panel-note {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--idr-taupe);
+      text-transform: none;
+      letter-spacing: 0.01em;
+      margin-top: 4px;
+    }
+
+    /* Category hero — Armadillo-inspired, Idraren-owned */
+    .cat-hero {
+      position: relative;
+      min-height: min(78vh, 760px);
+      height: 78vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: var(--idr-charcoal);
+      color: var(--idr-ivory);
+    }
+    .cat-hero-media {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+    .cat-hero-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      display: block;
+      transform: none;
+      transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .cat-hero.is-ready .cat-hero-media img {
+      transform: none;
+    }
+    .cat-hero-wash {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(180deg, rgba(37, 37, 34, 0.35) 0%, rgba(37, 37, 34, 0.22) 45%, rgba(37, 37, 34, 0.55) 100%);
+      pointer-events: none;
+    }
+    .cat-hero-copy {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 48px 24px;
+      max-width: 36rem;
+      margin: 0 auto;
+    }
+    /* With the body copy gone the title is usually the only child; its
+       bottom margin would otherwise hang 66px of dead space under it. */
+    .cat-hero-copy h1:last-child { margin-bottom: 0; }
+    .cat-hero-copy h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: clamp(42px, 6.5vw, 84px);
+      line-height: 1.02;
+      letter-spacing: -0.02em;
+      margin: 0 0 18px;
+      color: var(--idr-ivory);
+    }
+    .cat-hero-copy p {
+      font-size: clamp(14px, 1.35vw, 17px);
+      line-height: 1.65;
+      color: rgba(232, 216, 200, 0.88);
+      margin: 0 auto 28px;
+      max-width: 38ch;
+    }
+    .cat-hero-cta {
+      display: inline-flex;
+      border: none;
+      background: transparent;
+      padding: 0 0 6px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--idr-ivory);
+      border-bottom: 1px solid rgba(232, 216, 200, 0.85);
+      cursor: pointer;
+      transition: opacity 0.35s ease, letter-spacing 0.35s ease;
+    }
+    .cat-hero-cta:hover {
+      opacity: 0.8;
+      letter-spacing: 0.32em;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .cat-hero-copy {
+        opacity: 0;
+        transform: translate3d(0, 18px, 0);
+        transition:
+          opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.12s,
+          transform 1s cubic-bezier(0.22, 1, 0.36, 1) 0.12s;
+      }
+      .cat-hero.is-ready .cat-hero-copy {
+        opacity: 1;
+        transform: none;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .cat-hero-media img { transform: none; transition: none; }
+    }
+
+    /* Sticky browse chrome — pills + filters below hero */
+    .shop-browse {
+      position: sticky;
+      top: var(--shop-header-h, 108px);
+      z-index: 35;
+      background: var(--idr-stone);
+      border-bottom: 1px solid var(--idr-charcoal-08);
+      padding: 14px var(--idr-inset) 12px;
+    }
+    .shop-browse.is-fixed {
+      position: fixed !important;
+      left: 0;
+      right: 0;
+      top: var(--shop-header-h, 108px);
+      width: 100%;
+    }
+    .shop-pills {
+      position: relative;
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 10px;
+      padding: 0 0 14px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .shop-pills::-webkit-scrollbar { display: none; }
+    .shop-pill-thumb {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 40px;
+      border-radius: 999px;
+      background: var(--idr-charcoal);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      transition:
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s ease;
+      will-change: transform, width;
+    }
+    .shop-pills.is-thumb-ready .shop-pill-thumb { opacity: 1; }
+    .shop-pills button {
+      position: relative;
+      z-index: 1;
+      flex: 0 0 auto;
+      border: 1px solid rgba(37, 37, 34, 0.2);
+      background: transparent;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-family: inherit;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--idr-charcoal);
+      cursor: pointer;
+      white-space: nowrap;
+      transition:
+        color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        background 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .shop-pills button:hover {
+      border-color: var(--idr-charcoal);
+    }
+    .shop-pills button.is-active {
+      color: var(--idr-ivory);
+      border-color: transparent;
+      background: transparent;
+    }
+    /* Collections sub-row — plain underlined text, not capsules.
+       Rounded pills here read as bulbs and collided visually with the other
+       circular elements on the page, so this row drops the pill shape, the
+       borders and the sliding thumb entirely and reads as a filter list. */
+    /* Closed, the row folds to zero height rather than staying invisible:
+       visibility:hidden alone kept its ~42px, an empty band between the pills
+       and the filter bar. It folds with a transition instead of display:none,
+       because a 42px snap inside the sticky bar made the page lurch (see
+       overflow-anchor on html below). */
+    .shop-pills--sub {
+      display: flex;
+      visibility: hidden;
+      max-height: 0;
+      opacity: 0;
+      padding: 0;
+      margin-top: 0;
+      transition:
+        max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        padding 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        margin 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.2s ease,
+        visibility 0s linear 0.35s;
+      gap: 26px;
+      /* "safe" keeps the first item reachable when the row overflows on a
+         narrow screen — plain centring would push it past the scroll origin. */
+      justify-content: center;
+      justify-content: safe center;
+    }
+    .shop-pills--sub.is-open {
+      visibility: visible;
+      max-height: 64px;
+      opacity: 1;
+      padding: 2px 0 14px;
+      margin-top: 2px;
+      transition:
+        max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        padding 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        margin 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s ease 0.08s,
+        visibility 0s;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .shop-pills--sub,
+      .shop-pills--sub.is-open { transition: none; }
+    }
+    .shop-pills--sub .shop-pill-thumb { display: none; }
+    .shop-pills--sub button {
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      padding: 4px 0;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: var(--idr-charcoal);
+      opacity: 0.5;
+      border-bottom: 1px solid transparent;
+      transition: opacity 0.3s ease, border-color 0.3s ease;
+    }
+    .shop-pills--sub button:hover {
+      opacity: 0.8;
+      border-color: rgba(37, 37, 34, 0.28);
+    }
+    .shop-pills--sub button.is-active {
+      opacity: 1;
+      color: var(--idr-charcoal);
+      background: transparent;
+      border-bottom-color: var(--idr-charcoal);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .shop-pill-thumb { transition: none; }
+      .shop-pills button.is-active {
+        background: var(--idr-charcoal);
+        border-color: var(--idr-charcoal);
+      }
+      .shop-pill-thumb { display: none; }
+    }
+
+    .cat-hero-copy h1,
+    .cat-hero-copy p,
+    .cat-hero-cta {
+      transition:
+        opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .cat-hero.is-swap .cat-hero-copy h1,
+    .cat-hero.is-swap .cat-hero-copy p,
+    .cat-hero.is-swap .cat-hero-cta {
+      opacity: 0;
+      transform: translate3d(0, 12px, 0);
+    }
+    .shop-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px 28px;
+      padding: 10px 0 0;
+      position: relative;
+      z-index: 1;
+    }
+    .shop-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 22px;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--idr-taupe);
+    }
+    .shop-dd {
+      position: relative;
+    }
+    .shop-dd-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      background: transparent;
+      padding: 4px 0;
+      color: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      font-family: inherit;
+      font-size: inherit;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .shop-dd-trigger:hover,
+    .shop-dd.is-open .shop-dd-trigger,
+    .shop-dd.is-active .shop-dd-trigger {
+      color: var(--idr-charcoal);
+    }
+    .shop-dd-chevron {
+      width: 10px;
+      height: 6px;
+      flex-shrink: 0;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.2;
+      opacity: 0.7;
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .shop-dd.is-open .shop-dd-chevron { transform: rotate(180deg); }
+    .shop-dd-menu {
+      position: absolute;
+      left: 0;
+      top: calc(100% + 10px);
+      z-index: 30;
+      min-width: 188px;
+      margin: 0;
+      padding: 8px 0;
+      list-style: none;
+      background: var(--idr-stone);
+      border: 1px solid var(--idr-charcoal-08, rgba(37, 37, 34, 0.08));
+      box-shadow: 0 18px 40px rgba(37, 37, 34, 0.08);
+      opacity: 0;
+      visibility: hidden;
+      transform: translate3d(0, -6px, 0);
+      pointer-events: none;
+      transition:
+        opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0.3s;
+    }
+    .shop-dd.is-open .shop-dd-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translate3d(0, 0, 0);
+      pointer-events: auto;
+    }
+    .shop-dd-option {
+      width: 100%;
+      display: block;
+      border: none;
+      background: transparent;
+      padding: 11px 16px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--idr-charcoal);
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+    .shop-dd-option:hover,
+    .shop-dd-option:focus {
+      background: var(--idr-ivory);
+      outline: none;
+    }
+    .shop-dd-option.is-active {
+      color: var(--idr-taupe);
+    }
+    .shop-count {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--idr-taupe);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Samples panel - replaces the catalogue grid for that one category. */
+    .samples-panel {
+      padding: 48px var(--idr-inset) 64px;
+      border-top: 1px solid var(--idr-charcoal-08);
+      background: var(--idr-stone);
+    }
+    .samples-panel[hidden],
+    .shop-grid-wrap[hidden],
+    .shop-toolbar[hidden] { display: none !important; }
+
+    .samples-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+      gap: clamp(28px, 4vw, 56px);
+      align-items: center;
+    }
+
+    .samples-copy { max-width: 54ch; }
+    .samples-eyebrow {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 19px;
+      color: var(--idr-taupe-ink);
+      margin-bottom: 14px;
+    }
+    .samples-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      color: var(--idr-charcoal);
+      margin: 0 0 16px;
+    }
+    .samples-lede {
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--idr-charcoal);
+      opacity: 0.82;
+      margin: 0 0 22px;
+    }
+
+    .samples-visual {
+      margin: 0;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      background: var(--idr-ivory);
+      /* Reference only: not clickable, and no hover state to imply otherwise. */
+      pointer-events: none;
+      user-select: none;
+    }
+    .samples-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      pointer-events: none;
+    }
+
+    .samples-note {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--idr-charcoal);
+      opacity: 0.82;
+      margin: 0 0 14px;
+    }
+    .samples-fine {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--idr-taupe-ink);
+      margin: 0 0 26px;
+    }
+    .samples-cta {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--idr-charcoal);
+      border-bottom: 1px solid var(--idr-charcoal);
+      padding-bottom: 6px;
+    }
+    .samples-cta:hover { opacity: 0.65; }
+
+    .shop-grid-wrap {
+      position: relative;
+      z-index: 1;
+      /* Bottom kept small: .shop-cue below opens with its own 56px, and the
+         two paddings stacked into a ~128px empty band under the last row. */
+      padding: 36px var(--idr-inset) 16px;
+      border-top: 1px solid var(--idr-charcoal-08);
+      background: var(--idr-stone);
+      transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .shop-grid-wrap.is-switching {
+      pointer-events: none;
+    }
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 48px 32px;
+    }
+    .shop-empty {
+      display: none;
+      padding: 48px 0;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--idr-taupe);
+      max-width: 36ch;
+    }
+    .shop-grid-wrap.is-empty .shop-grid { display: none; }
+    .shop-grid-wrap.is-empty .shop-empty { display: block; }
+
+    /* Product cards — 3-col catalogue grid.
+       Full content width (same inset as header/footer). Height is capped
+       so each card still fits in the viewport below sticky chrome. */
+    .product-card { min-width: 0; }
+    .product-card.is-hidden { display: none; }
+    @media (prefers-reduced-motion: no-preference) {
+      .product-card .product-tile {
+        opacity: 0;
+        transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .product-card.is-in .product-tile {
+        opacity: 1;
+      }
+      /* Revealed by a filter change rather than by scrolling: no entrance. */
+      .product-card.is-instant .product-tile {
+        transition: none !important;
+      }
+    }
+
+    .product-tile {
+      position: relative;
+      display: block;
+      color: inherit;
+      min-width: 0;
+      width: 100%;
+      background: var(--idr-stone);
+    }
+    /* Frame matches Home New Arrivals: copy lives on the photo. */
+    .product-media {
+      position: relative;
+      overflow: hidden;
+      background: transparent;
+      margin: 0;
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      max-height: calc(100svh - var(--shop-header-h, 108px) - var(--shop-browse-h, 120px) - 40px);
+    }
+    .product-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center center;
+      display: block;
+      transition:
+        filter 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .product-media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: rgba(237, 230, 222, 0);
+      pointer-events: none;
+      transition: background 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .product-copy {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 70px 22px 20px;
+      background: linear-gradient(
+        to top,
+        rgba(31, 30, 22, 0.84) 0%,
+        rgba(31, 30, 22, 0.54) 44%,
+        rgba(31, 30, 22, 0) 100%
+      );
+      pointer-events: none;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      /* Lighten the hovered piece so it reads as selected (no image swap). */
+      .product-tile:hover .product-media img {
+        filter: brightness(1.1);
+      }
+      .product-tile:hover .product-media::after {
+        background: rgba(237, 230, 222, 0.22);
+      }
+    }
+    .product-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(17px, 1.35vw, 21px);
+      font-weight: 600;
+      margin: 0 0 8px;
+      color: var(--idr-ivory);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      text-shadow: 0 1px 14px rgba(0, 0, 0, 0.4);
+    }
+    .product-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--idr-ivory-70);
+      line-height: 1.5;
+      text-shadow: 0 1px 14px rgba(0, 0, 0, 0.4);
+    }
+    .product-price {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: none;
+      color: var(--idr-ivory);
+      margin: 0;
+      opacity: 0.9;
+      text-shadow: 0 1px 14px rgba(0, 0, 0, 0.4);
+    }
+    .product-view { display: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .product-media img,
+      .product-media::after { transition: none; }
+    }
+
+    .shop-cue {
+      text-align: center;
+      padding: 56px var(--idr-inset) 48px;
+      position: relative;
+      z-index: 2;
+      background: var(--idr-stone);
+    }
+    .shop-cue p {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--idr-taupe);
+      margin: 0 0 18px;
+    }
+    .shop-cue a {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--idr-charcoal);
+      padding-bottom: 4px;
+      color: var(--idr-charcoal);
+    }
+
+    .nl-popup {
+      position: fixed; right: 28px; bottom: 28px; width: min(360px, calc(100vw - 32px));
+      background: var(--idr-stone); color: var(--idr-charcoal); z-index: 200;
+      border: 1px solid var(--idr-charcoal-08); box-shadow: 0 18px 48px rgba(37, 37, 34, 0.16);
+      opacity: 0; transform: translate3d(0, 20px, 0); pointer-events: none;
+      transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .nl-popup.is-open { opacity: 1; transform: none; pointer-events: auto; }
+    .nl-popup-inner { padding: 32px 28px 28px; position: relative; }
+    .nl-close {
+      position: absolute; top: 12px; right: 12px; border: none; background: transparent;
+      padding: 6px 8px; cursor: pointer; color: var(--idr-charcoal); opacity: 0.45;
+      font-size: 20px; line-height: 1; font-family: inherit;
+    }
+    .nl-close:hover { opacity: 0.85; }
+    .nl-eyebrow { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 16px; color: var(--idr-taupe); margin: 0 0 10px; }
+    .nl-title { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 26px; line-height: 1.15; letter-spacing: -0.015em; margin: 0 0 12px; max-width: 14ch; }
+    .nl-body { font-size: 13px; line-height: 1.65; color: var(--idr-charcoal); opacity: 0.7; margin: 0 0 22px; }
+    .nl-form { display: flex; align-items: end; gap: 0; border-bottom: 1px solid var(--idr-charcoal-08); }
+    .nl-form input { flex: 1; border: none; background: transparent; padding: 10px 0; font: inherit; font-size: 14px; color: var(--idr-charcoal); outline: none; min-width: 0; }
+    .nl-form button { border: none; background: transparent; padding: 10px 0 10px 12px; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; cursor: pointer; color: var(--idr-charcoal); white-space: nowrap; }
+    .nl-thanks { display: none; font-size: 14px; line-height: 1.55; margin: 0; }
+    .nl-popup.is-done .nl-form, .nl-popup.is-done .nl-body { display: none; }
+    .nl-popup.is-done .nl-thanks { display: block; }
+    @media (max-width: 640px) { .nl-popup { right: 16px; bottom: 16px; left: 16px; width: auto; } }
+
+    .shop-footer {
+      background: var(--idr-dark);
+      color: var(--idr-ivory);
+      padding: 90px var(--idr-inset);
+      position: relative;
+      z-index: 2;
+    }
+    .shop-footer-top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 48px;
+      align-items: end;
+      margin-bottom: 72px;
+      padding-bottom: 56px;
+      border-bottom: 1px solid var(--idr-ivory-12);
+    }
+    .shop-footer-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 64px;
+      margin-bottom: 100px;
+    }
+    .shop-footer-bottom {
+      border-top: 1px solid var(--idr-ivory-10);
+      padding-top: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--idr-ivory-65);
+    }
+
+    /* Search overlay — shared with Home */
+    .search-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1300;
+      display: flex;
+      flex-direction: column;
+      background: var(--idr-stone);
+      color: var(--idr-charcoal);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.45s;
+    }
+    .search-overlay.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .search-overlay-top {
+      display: flex;
+      justify-content: flex-end;
+      padding: 28px var(--idr-inset);
+    }
+    .search-close {
+      border: none;
+      background: transparent;
+      padding: 8px 0;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--idr-charcoal);
+      cursor: pointer;
+    }
+    .search-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8vh var(--idr-inset) 64px;
+      max-width: 920px;
+      width: 100%;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .search-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 19px;
+      color: var(--idr-taupe);
+      margin: 0 0 20px;
+    }
+    .search-field {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid var(--idr-charcoal);
+      background: transparent;
+      padding: 12px 0 18px;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: -0.015em;
+      color: var(--idr-charcoal);
+      outline: none;
+      border-radius: 0;
+    }
+    .search-field::placeholder { color: var(--idr-taupe); opacity: 0.7; }
+    .search-hint {
+      margin: 16px 0 0;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--idr-taupe);
+    }
+    .search-results {
+      list-style: none;
+      margin: 48px 0 0;
+      padding: 0;
+      overflow-y: auto;
+      max-height: min(52vh, 480px);
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .search-results::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    .search-result {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      gap: 20px;
+      align-items: center;
+      padding: 16px 0;
+      border-top: 1px solid var(--idr-charcoal-08);
+      color: inherit;
+    }
+    .search-result:last-child { border-bottom: 1px solid var(--idr-charcoal-08); }
+    .search-result:hover { opacity: 0.7; }
+    .search-result-thumb {
+      width: 72px; height: 90px; overflow: hidden; background: var(--idr-ivory);
+    }
+    .search-result-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .search-result-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 22px;
+      margin: 0 0 4px;
+    }
+    .search-result-meta { font-size: 13px; color: var(--idr-taupe); margin: 0; }
+    .search-result-price { font-size: 13px; color: var(--idr-taupe); white-space: nowrap; }
+    .search-empty {
+      margin-top: 48px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--idr-taupe);
+      display: none;
+    }
+    .search-overlay.is-empty .search-empty { display: block; }
+    .search-overlay.is-empty .search-results { display: none; }
+    html.search-open,
+    html.search-open body { overflow: hidden !important; }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal {
+        opacity: 0;
+        transition: opacity 1.05s cubic-bezier(0.22, 1, 0.36, 1);
+        transition-delay: var(--r, 0ms);
+      }
+      .reveal.is-in { opacity: 1; }
+    }
+
+    @media (max-width: 960px) {
+      :root { --idr-inset: 32px; }
+      .cat-hero {
+        height: 70vh;
+        min-height: 520px;
+      }
+      .cat-hero-copy h1 { font-size: clamp(36px, 10vw, 56px); }
+      .shop-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 32px;
+        gap: 16px;
+      }
+      .shop-nav { display: none; }
+      .shop-utils > *:not(.mm-toggle) { display: none; }
+      .shop-utils { gap: 0; }
+      .shop-collection { padding: 40px 32px 44px; }
+      .shop-spotlight-media { aspect-ratio: 16 / 9; }
+      .shop-browse { padding: 12px 32px; }
+      .shop-grid-wrap { padding: 24px 32px 12px; }
+      .shop-grid { grid-template-columns: 1fr; gap: 36px; }
+      .samples-panel { padding: 44px 32px 48px; }
+      .samples-layout {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+      .samples-visual { aspect-ratio: 4 / 5; max-width: 420px; }
+      .shop-tile { height: 76vh; }
+      .is-hero .product-tile {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+      }
+      .is-hero .product-media { aspect-ratio: 16 / 10; }
+      .is-hero .product-copy {
+        border: none;
+        padding: 52px 22px 18px;
+      }
+      .shop-footer { padding: 70px 32px; }
+      .shop-footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+      .shop-footer-top { grid-template-columns: 1fr; gap: 24px; }
+    }
+    @media (max-width: 640px) {
+      :root { --idr-inset: 20px; }
+      /* 70vh made the banner fill the whole phone screen; a fixed ratio keeps
+         it a banner and brings the category pills into the first view. */
+      /* Filter menus are 188px wide and anchored to their trigger, so the ones
+         on the right of the wrapped filter row poked past the screen (hidden
+         menus still count) and the whole page scrolled sideways. On phone they
+         open full-width under the filter block instead. */
+      .shop-filters { position: relative; }
+      .shop-dd { position: static; }
+      .shop-dd-menu { left: 0; right: 0; min-width: 0; }
+      .cat-hero {
+        height: auto;
+        min-height: 0;
+        aspect-ratio: 4 / 3;
+      }
+      .shop-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        top: 0;
+      }
+      .shop-nav { display: none; }
+      .shop-utils > *:not(.mm-toggle) { display: none; }
+      .lang-toggle { font-size: 10px; }
+      .idr-mark { width: 108px; height: 40px; }
+      .idr-wordmark { font-size: 17px; letter-spacing: 0.3em; }
+      .shop-topbar { font-size: 9px; letter-spacing: 0.24em; padding: 0 16px; height: 32px; text-align: center; position: static; }
+      .shop-collection { padding: 28px 20px 32px; }
+      .shop-collection-head h1 { font-size: clamp(30px, 8vw, 40px); }
+      .shop-spotlight-media { aspect-ratio: 4 / 3; min-height: 220px; }
+      .shop-spotlight-copy h2 { font-size: clamp(24px, 6.5vw, 30px); }
+      .shop-spotlight-copy p { font-size: 14px; }
+      .shop-browse { padding: 10px 20px 8px; }
+      .shop-pill-thumb { display: none !important; }
+      .shop-pills button.is-active {
+        color: var(--idr-ivory);
+        background: var(--idr-charcoal);
+        border-color: var(--idr-charcoal);
+      }
+      .shop-pills { gap: 8px; }
+      .shop-pills button { padding: 9px 14px; font-size: 10px; letter-spacing: 0.14em; }
+      .shop-toolbar { gap: 10px 14px; }
+      .shop-filters { gap: 8px 14px; font-size: 10px; }
+      .shop-count { font-size: 10px; }
+      .shop-grid-wrap { padding: 20px 20px 8px; }
+      .shop-grid { grid-template-columns: 1fr; gap: 28px; }
+      /* .shop-cue below opens with its own 40px; a 56px bottom here stacked
+         into a ~100px empty band under "Request a sample". */
+      .samples-panel { padding: 36px 20px 24px; }
+      .samples-layout { gap: 22px; }
+      .samples-visual { max-width: none; }
+      .shop-tile { height: 62vh; min-height: 420px; }
+      .shop-tile-name { font-size: clamp(40px, 12vw, 64px); }
+      .shop-tile-cta { bottom: 26px; font-size: 10px; }
+      .is-hero .product-tile { height: auto; }
+      .is-hero .product-media { aspect-ratio: 4 / 3; }
+      .is-hero .product-copy { padding: 20px 22px 26px; }
+      .is-hero .product-name { font-size: clamp(24px, 6vw, 30px); }
+      .product-name { font-size: 20px; }
+      .shop-cue { padding: 40px 20px 32px; }
+      .shop-footer { padding: 56px 20px 40px; }
+      .shop-footer-top { grid-template-columns: 1fr; gap: 24px; margin-bottom: 40px; padding-bottom: 32px; }
+      .shop-footer-grid { grid-template-columns: 1fr; gap: 32px; margin-bottom: 32px; }
+      .shop-footer-bottom { flex-direction: column; align-items: flex-start; gap: 16px; font-size: 10px; }
+      .shop-footer-bottom > div:last-child { flex-wrap: wrap; gap: 14px 20px; }
+      /* Legal links sit on their own lines under a hairline, apart from lang/currency/social. */
+      .shop-footer-bottom a[href$="Privacy.dc.html"] { flex: 0 0 100%; margin-top: 6px; padding-top: 20px; border-top: 1px solid var(--idr-ivory-10); }
+      .shop-footer-bottom a[href$="Terms.dc.html"] { flex: 0 0 100%; }
+      /* Lang and currency are different controls — each gets its own row. */
+      .shop-footer-bottom > div:last-child .lang-toggle { flex: 0 0 100%; justify-content: flex-start; }
+      .shop-footer-bottom > div:last-child .lang-toggle + a { flex: 0 0 100%; padding: 2px 0 6px; }
+      /* Social marks get their own row after the switchers. */
+      .shop-footer-bottom > div:last-child::after { content: ""; flex: 0 0 100%; order: 2; }
+      .shop-footer-bottom .social-link { order: 3; }
+      .shop-footer-bottom a[href$="Privacy.dc.html"], .shop-footer-bottom a[href$="Terms.dc.html"] { order: 4; }
+      /* The row carries an inline gap: 28px, which doubled around the line break; tighten rows only. */
+      .shop-footer-bottom > div:last-child { row-gap: 14px !important; }
+      .search-overlay-top { padding: 20px 20px; }
+      .search-body { padding: 6vh 20px 40px; }
+      .search-field { font-size: clamp(24px, 7vw, 32px); }
+      .search-result { grid-template-columns: 56px 1fr; }
+      .search-result-price { display: none; }
+    }
+
+    /* Mobile + tablet menu (burger + slide-in panel) */
+    .mm-toggle { display: none; }
+    .mm-panel { display: none; }
+    @media (max-width: 1100px) {
+      /* Burger stays in the sticky header (not position:fixed). Fixed inside
+         sticky breaks on iOS Safari and scrolls with the page. */
+      .mm-toggle {
+        display: inline-flex; flex-direction: column; justify-content: center; align-items: center;
+        gap: 4.5px; width: 32px; height: 32px; border: none; background: transparent; padding: 0; cursor: pointer;
+        color: var(--idr-charcoal);
+        position: relative; z-index: 2;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-appearance: none; appearance: none;
+        outline: none;
+      }
+      .mm-toggle:focus-visible { outline: 1px dashed var(--idr-charcoal); outline-offset: 4px; }
+      .mm-toggle span {
+        display: block; width: 20px; height: 1.5px; background: currentColor;
+        transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+      }
+      .mm-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+      .mm-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+      .mm-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+      .mm-panel {
+        display: flex; flex-direction: column; justify-content: space-between;
+        position: fixed; inset: 0; z-index: 55;
+        background: var(--idr-stone); color: var(--idr-charcoal);
+        padding: 88px 28px 40px;
+        opacity: 0; visibility: hidden; pointer-events: none;
+        transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.4s;
+      }
+      .mm-panel.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+      .mm-nav { display: flex; flex-direction: column; gap: 22px; }
+      .mm-nav a {
+        font-family: 'Cormorant Garamond', serif; font-weight: 500;
+        font-size: 30px; letter-spacing: -0.01em; line-height: 1.1; color: var(--idr-charcoal);
+      }
+      .mm-utils { display: flex; padding-top: 32px; border-top: 1px solid var(--idr-charcoal-08); }
+      .mm-utils .lang-toggle {
+        color: var(--idr-charcoal); font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;
+      }
+      html.mm-open, html.mm-open body { overflow: hidden; }
+      .mm-close {
+        position: absolute; top: 18px; right: 16px;
+        width: 44px; height: 44px; border: none; background: transparent; padding: 0;
+        cursor: pointer; color: var(--idr-charcoal);
+        display: inline-flex; align-items: center; justify-content: center;
+        z-index: 2;
+      }
+      .mm-close svg { display: block; width: 22px; height: 22px; stroke: currentColor; stroke-width: 1.6; fill: none; }
+      .mm-close:hover { opacity: 0.7; }
+    }
+  
+    /* Info disclosure in the top-right utilities. CSS-only so every page
+       behaves the same without per-page script. */
+    .info-menu { position: relative; display: inline-flex; }
+    .info-menu-trigger {
+      border: none;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      font: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      color: inherit;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .info-menu-panel {
+      position: absolute;
+      top: calc(100% + 14px);
+      right: 0;
+      z-index: 60;
+      min-width: 208px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 20px;
+      background: var(--idr-stone);
+      border: 1px solid var(--idr-charcoal-08);
+      box-shadow: 0 18px 40px rgba(37, 37, 34, 0.09);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s;
+    }
+    .info-menu:hover .info-menu-panel,
+    .info-menu:focus-within .info-menu-panel {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+    .info-menu-panel a {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--idr-taupe-ink);
+      white-space: nowrap;
+    }
+    .info-menu-panel a:hover { color: var(--idr-charcoal); }
+
+    /* Footer social marks — icon replaces the word, label kept for screen readers. */
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+    }
+    .social-link svg { width: 24px; height: 24px; display: block; }
+    /* Icons sit inside the footer row's 28px gap; pull the pair together. */
+    .social-link + .social-link { margin-left: -16px; }
+    .social-link:hover { opacity: 0.7; }
+
+    @media (max-width: 860px) {
+      .info-menu { display: none; }
+    }
+
+    /* Header "Saved" link. The count is written by idraren.js and hidden at
+       zero, so the header does not carry a stray 0. */
+    /* Saved: a bookmark mark with a count badge, sized to sit on the same
+       baseline as the search and language icons beside it. */
+    /* Saved: an outline bookmark drawn to match the search and globe icons
+       beside it (same size, same 1.4 stroke). It never fills: a solid black
+       mark read heavy next to the outline icons. The count sits in a small
+       badge on the corner, ringed in the header colour so it separates from
+       the stroke, and is hidden at zero. */
+    .saved-link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      color: inherit;
+    }
+    .saved-icon {
+      width: 19px;
+      height: 19px;
+      display: block;
+      transition: opacity 0.3s ease;
+    }
+    .saved-link:hover .saved-icon { opacity: 0.65; }
+    .saved-count {
+      position: absolute;
+      top: -5px;
+      right: -9px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      box-sizing: border-box;
+      border-radius: 999px;
+      background: var(--idr-charcoal);
+      color: var(--idr-stone);
+      box-shadow: 0 0 0 2px var(--idr-stone);
+      font-family: 'Manrope', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0;
+      line-height: 16px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      pointer-events: none;
+    }
+    .saved-count[hidden],
+    .saved-count:empty { display: none; }
+    /* On dark grounds the badge inverts and its ring follows the ground. */
+    .on-dark .saved-count,
+    #hero .saved-count {
+      background: var(--idr-ivory);
+      color: var(--idr-dark);
+      box-shadow: 0 0 0 2px var(--idr-dark);
+    }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; background: var(--idr-stone);">
+  <header class="shop-header">
+    <a href="./Home.dc.html" aria-label="Idraren, home"><span class="idr-wordmark">IDRAREN</span></a>
+    <nav class="shop-nav" aria-label="Primary">
+      <div class="nav-item" id="nav-shop">
+        <a href="./Shop.dc.html" aria-haspopup="true" aria-expanded="false" id="nav-shop-trigger" data-i18n="nav.shop">Shop</a>
+        <div class="nav-panel" role="menu" aria-label="Shop categories">
+          <div class="nav-panel-inner">
+            <div class="nav-panel-col">
+              <div class="nav-panel-label" data-i18n="nav.shopLabel">Shop</div>
+              <a href="./Shop.dc.html?cat=new" data-cat="new" role="menuitem" data-i18n="nav.newArrivals">New Arrivals</a>
+              <a href="./Shop.dc.html?cat=bestsellers" data-cat="bestsellers" role="menuitem" data-i18n="nav.bestSellers">Best Sellers</a>
+              <a href="./Shop.dc.html?cat=instock" data-cat="instock" role="menuitem" data-i18n="nav.inStock">In stock</a>
+              <a href="./Shop.dc.html?cat=customized" data-cat="customized" role="menuitem" data-i18n="nav.sale">Customized</a>
+              <a href="./Shop.dc.html?cat=collections" data-cat="collections" role="menuitem" data-i18n="nav.collections">Collections</a>
+              <a href="./Shop.dc.html?cat=samples" data-cat="samples" role="menuitem" data-i18n="nav.samples">Samples</a>
+            </div>
+            <div class="nav-panel-col">
+              <div class="nav-panel-label" data-i18n="nav.collections">Collections</div>
+              <a href="./Shop.dc.html?cat=collections&amp;col=atlas" data-cat="collections" data-col="atlas" role="menuitem" data-i18n="col.atlas">Atlas</a>
+              <a href="./Shop.dc.html?cat=collections&amp;col=rabat" data-cat="collections" data-col="rabat" role="menuitem" data-i18n="col.rabat">Rabat</a>
+              <a href="./Shop.dc.html?cat=collections&amp;col=anfa" data-cat="collections" data-col="anfa" role="menuitem" data-i18n="col.anfa">Anfa</a>
+              <a href="./Shop.dc.html?cat=collections&amp;col=sahara" data-cat="collections" data-col="sahara" role="menuitem" data-i18n="col.sahara">Sahara</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a href="./Story.dc.html" data-i18n="nav.story">About</a>
+      <a href="./Contact.dc.html" data-i18n="nav.contact">Contact</a>
+      <a href="./Trade.dc.html" data-i18n="nav.collaborate">Collaborate</a>
+    </nav>
+    <div class="shop-utils">
+      <button type="button" class="search-open-btn" id="search-open" aria-label="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg></button>
+      <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Language"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg><span class="lang-opt is-on lang-code" data-lang="en">EN</span><span class="lang-opt lang-code" data-lang="fr">FR</span></button>
+      <a class="saved-link" data-saved-link href="./Saved.dc.html" aria-label="Saved" title="Saved"><svg class="saved-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.75h11a1 1 0 0 1 1 1v15.1a.4.4 0 0 1-.62.33L12 16.4l-5.88 3.78a.4.4 0 0 1-.62-.33V4.75a1 1 0 0 1 1-1Z"/></svg><span class="saved-count" data-saved-count hidden></span></a>
+      <div class="info-menu">
+        <button type="button" class="info-menu-trigger" aria-haspopup="true" data-i18n="nav.info">Info</button>
+        <div class="info-menu-panel" role="menu">
+          <a href="./Shipping.dc.html" role="menuitem" data-i18n="footer.shipping">Shipping &amp; VAT</a>
+          <a href="./Cancellations.dc.html" role="menuitem" data-i18n="footer.cancel">Cancellations</a>
+          <a href="./Care.dc.html" role="menuitem" data-i18n="footer.care">Care</a>
+          <a href="./Size-guide.dc.html" role="menuitem" data-i18n="footer.size">Size</a>
+        </div>
+      </div>
+      <a href="./Contact.dc.html" data-i18n="nav.enquiry">Enquiry</a>
+      <button type="button" class="mm-toggle" id="mm-toggle" aria-label="Menu" aria-expanded="false" aria-controls="mm-panel">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <div class="mm-panel" id="mm-panel" aria-hidden="true">
+    <button type="button" class="mm-close" id="mm-close" aria-label="Close menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+    </button>
+    <nav class="mm-nav" aria-label="Mobile primary">
+      <a href="./Shop.dc.html" data-i18n="nav.shop">Shop</a>
+      <a href="./Story.dc.html" data-i18n="nav.story">About</a>
+      <a href="./Contact.dc.html" data-i18n="nav.contact">Contact</a>
+      <a href="./Trade.dc.html" data-i18n="nav.collaborate">Collaborate</a>
+      <a href="./Contact.dc.html" data-i18n="nav.enquiry">Enquiry</a>
+    </nav>
+    <div class="mm-info">
+      <p class="mm-label" data-i18n="nav.info">Info</p>
+      <a href="./Shipping.dc.html" data-i18n="footer.shipping">Shipping &amp; VAT</a>
+      <a href="./Cancellations.dc.html" data-i18n="footer.cancel">Cancellations</a>
+      <a href="./Care.dc.html" data-i18n="footer.care">Care</a>
+      <a href="./Size-guide.dc.html" data-i18n="footer.size">Size</a>
+    </div>
+    <div class="mm-utils">
+      <button type="button" class="mm-icon" data-mm-search aria-label="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg></button>
+      <a class="mm-icon saved-link" data-saved-link href="./Saved.dc.html" aria-label="Saved"><svg class="saved-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.75h11a1 1 0 0 1 1 1v15.1a.4.4 0 0 1-.62.33L12 16.4l-5.88 3.78a.4.4 0 0 1-.62-.33V4.75a1 1 0 0 1 1-1Z"/></svg><span class="saved-count" data-saved-count hidden></span></a>
+      <button type="button" class="lang-toggle" aria-label="Language">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+        <span class="lang-opt is-on lang-code" data-lang="en">EN</span><span class="lang-opt lang-code" data-lang="fr">FR</span>
+      </button>
+    </div>
+  </div>
+
+  <section class="cat-hero lang-copy" id="cat-hero" aria-live="polite">
+    <div class="cat-hero-media">
+      <img id="cat-hero-img" src="./images/collection-banner-16x9-2.jpg" alt="Client rugs hanging in a Moroccan workshop" loading="eager">
+    </div>
+    <div class="cat-hero-wash" aria-hidden="true"></div>
+    <div class="cat-hero-copy">
+      <h1 id="cat-hero-title" data-i18n="shop.title">Our collection.</h1>
+    </div>
+  </section>
+
+  <div class="shop-browse lang-copy" id="shop-browse">
+    <div class="shop-pills reveal" style="--r: 60ms;" id="cat-row" role="tablist" aria-label="Shop categories">
+      <span class="shop-pill-thumb" id="cat-pill-thumb" aria-hidden="true"></span>
+      <button type="button" class="is-active" data-cat="all" data-i18n="cat.all">All</button>
+      <button type="button" data-cat="new" data-i18n="nav.newArrivals">New Arrivals</button>
+      <button type="button" data-cat="bestsellers" data-i18n="nav.bestSellers">Best Sellers</button>
+      <button type="button" data-cat="instock" data-i18n="nav.inStock">In stock</button>
+      <button type="button" data-cat="customized" data-i18n="nav.sale">Customized</button>
+      <button type="button" data-cat="collections" data-i18n="nav.collections">Collections</button>
+      <button type="button" data-cat="samples" data-i18n="nav.samples">Samples</button>
+    </div>
+
+    <div class="shop-pills shop-pills--sub" id="col-row" role="tablist" aria-label="Collections">
+      <span class="shop-pill-thumb" id="col-pill-thumb" aria-hidden="true"></span>
+      <button type="button" class="is-active" data-col="all" data-i18n="col.all">All collections</button>
+      <button type="button" data-col="atlas" data-i18n="col.atlas">Atlas</button>
+      <button type="button" data-col="rabat" data-i18n="col.rabat">Rabat</button>
+      <button type="button" data-col="anfa" data-i18n="col.anfa">Anfa</button>
+      <button type="button" data-col="sahara" data-i18n="col.sahara">Sahara</button>
+    </div>
+
+    <div class="shop-toolbar reveal" style="--r: 100ms;">
+    <div class="shop-filters" id="shop-filters">
+      <div class="shop-dd" data-filter="size">
+        <button type="button" class="shop-dd-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="shop-dd-label" data-base="filter.size">Size</span>
+          <svg class="shop-dd-chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5 L6 6.5 L11 1.5"/></svg>
+        </button>
+        <ul class="shop-dd-menu" role="listbox">
+          <li><button type="button" class="shop-dd-option is-active" data-value="all" data-i18n="opt.size.all">All sizes</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="4x6" data-i18n="opt.size.4x6">120 × 180 cm (4 × 6 ft)</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="5x7" data-i18n="opt.size.5x7">150 × 210 cm (5 × 7 ft)</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="5x8" data-i18n="opt.size.5x8">150 × 240 cm (5 × 8 ft)</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="6x8" data-i18n="opt.size.6x8">180 × 240 cm (6 × 8 ft)</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="6x9" data-i18n="opt.size.6x9">180 × 270 cm (6 × 9 ft)</button></li>
+        </ul>
+      </div>
+      <div class="shop-dd" data-filter="colour">
+        <button type="button" class="shop-dd-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="shop-dd-label" data-base="filter.colour">Colour</span>
+          <svg class="shop-dd-chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5 L6 6.5 L11 1.5"/></svg>
+        </button>
+        <ul class="shop-dd-menu" role="listbox">
+          <li><button type="button" class="shop-dd-option is-active" data-value="all" data-i18n="opt.colour.all">All colours</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="neutral" data-i18n="opt.colour.neutral">Neutral</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="warm" data-i18n="opt.colour.warm">Warm</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="multicolour" data-i18n="opt.colour.multi">Multicolour</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="dark" data-i18n="opt.colour.dark">Dark</button></li>
+        </ul>
+      </div>
+      <div class="shop-dd" data-filter="fibre">
+        <button type="button" class="shop-dd-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="shop-dd-label" data-base="filter.fibre">Fibre</span>
+          <svg class="shop-dd-chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5 L6 6.5 L11 1.5"/></svg>
+        </button>
+        <ul class="shop-dd-menu" role="listbox">
+          <li><button type="button" class="shop-dd-option is-active" data-value="all" data-i18n="opt.fibre.all">All fibres</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="knots" data-i18n="opt.fibre.knots">Knots</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="flatweave" data-i18n="opt.fibre.flatweave">Flat weave</button></li>
+        </ul>
+      </div>
+      <div class="shop-dd" data-filter="material">
+        <button type="button" class="shop-dd-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="shop-dd-label" data-base="filter.material">Material</span>
+          <svg class="shop-dd-chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5 L6 6.5 L11 1.5"/></svg>
+        </button>
+        <ul class="shop-dd-menu" role="listbox">
+          <li><button type="button" class="shop-dd-option is-active" data-value="all" data-i18n="opt.material.all">All materials</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="wool" data-i18n="opt.material.wool">Wool</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="silk" data-i18n="opt.material.silk">Silk</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="bamboo" data-i18n="opt.material.bamboo">Bamboo</button></li>
+        </ul>
+      </div>
+      <div class="shop-dd" data-filter="col">
+        <button type="button" class="shop-dd-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="shop-dd-label" data-base="filter.collection">Collection</span>
+          <svg class="shop-dd-chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5 L6 6.5 L11 1.5"/></svg>
+        </button>
+        <ul class="shop-dd-menu" role="listbox">
+          <li><button type="button" class="shop-dd-option is-active" data-value="all" data-i18n="opt.col.all">All collections</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="atlas" data-i18n="col.atlas">Atlas</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="rabat" data-i18n="col.rabat">Rabat</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="anfa" data-i18n="col.anfa">Anfa</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="sahara" data-i18n="col.sahara">Sahara</button></li>
+        </ul>
+      </div>
+      <div class="shop-dd" data-filter="sort">
+        <button type="button" class="shop-dd-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="shop-dd-label" data-base="filter.sort">Sort · Featured</span>
+          <svg class="shop-dd-chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5 L6 6.5 L11 1.5"/></svg>
+        </button>
+        <ul class="shop-dd-menu" role="listbox">
+          <li><button type="button" class="shop-dd-option is-active" data-value="featured" data-i18n="opt.sort.featured">Featured</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="newest" data-i18n="opt.sort.newest">Newest</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="price-asc" data-i18n="opt.sort.priceAsc">Price · Low to high</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="price-desc" data-i18n="opt.sort.priceDesc">Price · High to low</button></li>
+          <li><button type="button" class="shop-dd-option" data-value="name" data-i18n="opt.sort.name">Name · A–Z</button></li>
+        </ul>
+      </div>
+    </div>
+    <div class="shop-count" id="shop-count">06 pieces</div>
+    </div>
+  </div>
+
+  <!-- Samples is not a catalogue: it is a short explanation plus one
+       reference photograph. Per the brief the image is decoration only -
+       no link, no hover, nothing to click. -->
+  <section class="samples-panel" id="samples-panel" hidden aria-labelledby="samples-title">
+    <div class="samples-layout">
+      <div class="samples-copy">
+        <div class="samples-eyebrow" data-i18n="samples.eyebrow">Samples</div>
+        <h2 class="samples-title" id="samples-title" data-i18n="samples.title">Feel the wool before you decide.</h2>
+        <p class="samples-lede" data-i18n="samples.lede">Photographs only tell you so much. We send samples so you can put the wool in your own light, against your own floor, and take your time with it.</p>
+        <p class="samples-note" data-i18n="samples.request">Samples are sent on request. Write to us and tell us what you are working on.</p>
+        <p class="samples-note" data-i18n="samples.custom">Every sample can be adapted — colour, texture, and the materials or details where it makes sense. We work that out with you directly.</p>
+        <p class="samples-fine" data-i18n="samples.fine">Images shown are for reference. Final samples are prepared for each enquiry.</p>
+        <a class="samples-cta" href="./Contact.dc.html?intent=swatch" data-i18n="samples.cta">Request a sample</a>
+      </div>
+      <figure class="samples-visual">
+        <img src="./images/samples/sample-group.jpg" alt="" loading="lazy">
+      </figure>
+    </div>
+  </section>
+
+  <section class="shop-grid-wrap" id="shop-grid-wrap">
+    <div class="shop-grid" id="shop-grid">
+      {{ productTiles }}
+    </div>
+    <p class="shop-empty" id="shop-empty" data-i18n="shop.empty">No pieces match these filters.</p>
+  </section>
+
+  <div class="shop-cue reveal lang-copy">
+    <p data-i18n="shop.cue">Looking for trade access or custom sizing?</p>
+    <a href="./Custom.dc.html" data-i18n="shop.cueCta">Start a custom enquiry</a>
+  </div>
+
+  <footer class="shop-footer">
+    <div class="shop-footer-top reveal lang-copy">
+      <div>
+        <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: clamp(24px, 2.4vw, 32px); line-height: 1.15; color: var(--idr-ivory); margin: 0 0 10px; max-width: 22ch;" data-i18n="footer.letters">Letters from the Atlas.</div>
+        <p style="font-size: 13px; line-height: 1.7; color: var(--idr-ivory-70); margin: 0; max-width: 42ch;" data-i18n="footer.lettersBody">New arrivals, artisan stories, and styling notes. Once a month, no more.</p>
+      </div>
+      <form style="display: flex; align-items: end; gap: 0; border-bottom: 1px solid var(--idr-ivory-40); min-width: 280px; max-width: 460px;">
+        <input type="email" data-i18n-placeholder="footer.email" placeholder="Your email address" style="flex: 1; border: none; background: transparent; padding: 10px 0; font-size: 14px; font-family: inherit; color: var(--idr-ivory); outline: none;">
+        <button type="submit" style="border: none; background: transparent; padding: 10px 4px; font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase; cursor: pointer; color: var(--idr-ivory);" data-i18n="footer.subscribe">Subscribe</button>
+      </form>
+    </div>
+    <div class="shop-footer-grid reveal lang-copy" style="--r: 80ms;">
+      <div>
+        <div style="margin-bottom: 24px; line-height: 0;"><span class="idr-mark is-light" style="width: 201px; height: 67px;"><img src="./images/logo-idraren.png" alt="Idraren"></span></div>
+        <p style="font-size: 13px; line-height: 1.75; color: var(--idr-ivory-70); max-width: 32ch; margin: 0;" data-i18n="footer.tagline">Handwoven in the Atlas. shipped worldwide.</p>
+      </div>
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; margin-bottom: 24px; color: var(--idr-ivory-65);" data-i18n="nav.shop">Shop</div>
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: var(--idr-ivory-92);">
+          <a href="./Shop.dc.html?cat=new" data-i18n="nav.newArrivals">New Arrivals</a>
+          <a href="./Shop.dc.html?cat=bestsellers" data-i18n="nav.bestSellers">Best Sellers</a>
+          <a href="./Shop.dc.html?cat=instock" data-i18n="nav.inStock">In stock</a>
+          <a href="./Shop.dc.html?cat=collections" data-i18n="nav.collections">Collections</a>
+          <a href="./Shop.dc.html?cat=samples" data-i18n="nav.samples">Samples</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; margin-bottom: 24px; color: var(--idr-ivory-65);" data-i18n="footer.house">House</div>
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: var(--idr-ivory-92);">
+          <a href="./Story.dc.html" data-i18n="nav.story">About</a>
+          <a href="./Contact.dc.html" data-i18n="nav.contact">Contact</a>
+          <a href="./Custom.dc.html" data-i18n="nav.custom">Custom</a>
+          <a href="./Trade.dc.html" data-i18n="nav.collaborate">Collaborate</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; margin-bottom: 24px; color: var(--idr-ivory-65);" data-i18n="footer.help">Info</div>
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: var(--idr-ivory-92);">
+          <a href="./Shipping.dc.html" data-i18n="footer.shipping">Shipping &amp; VAT</a>
+          <a href="./Cancellations.dc.html" data-i18n="footer.cancel">Cancellations</a>
+          <a href="./Size-guide.dc.html" data-i18n="footer.size">Size</a>
+          <a href="./Care.dc.html" data-i18n="footer.care">Care</a>
+          <a href="./Privacy.dc.html" data-i18n="footer.privacy">Privacy Policy</a>
+          <a href="./Terms.dc.html" data-i18n="footer.terms">Terms &amp; Conditions</a>
+        </div>
+      </div>
+    </div>
+    <div class="shop-footer-bottom reveal" style="--r: 120ms;">
+      <div>© 2026 Idraren</div>
+      <div style="display: flex; gap: 28px; align-items: center;">
+        <a href="#" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none"/></svg></a>
+            <a href="#" class="social-link" aria-label="Pinterest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9.25"/><path d="M9.6 19.2c-.35-1.35-.15-2.9.15-4.2l1.2-5.05"/><path d="M8.9 10.2a3.2 3.2 0 1 1 3.6 3.15"/><path d="M12.5 13.35c1.9.35 3.85-.9 4.2-3.15.4-2.6-1.45-4.7-4.1-4.7-2.5 0-4.3 1.5-4.7 3.7"/></svg></a>
+      </div>
+    </div>
+  </footer>
+
+  <aside class="nl-popup lang-copy" id="nl-popup" role="dialog" aria-modal="false" aria-labelledby="nl-title" aria-hidden="true">
+    <div class="nl-popup-inner">
+      <button type="button" class="nl-close" id="nl-close" aria-label="Close">×</button>
+      <div class="nl-eyebrow" data-i18n="nl.eyebrow">A letter from the Atlas</div>
+      <h2 class="nl-title" id="nl-title" data-i18n="nl.title">Once a month. No more.</h2>
+      <p class="nl-body" data-i18n="nl.body">New arrivals, artisan notes and quiet styling, sent to your inbox.</p>
+      <form class="nl-form" id="nl-form">
+        <input type="email" id="nl-email" required autocomplete="email" data-i18n-placeholder="footer.email" placeholder="Your email address">
+        <button type="submit" data-i18n="nl.submit">Join →</button>
+      </form>
+      <p class="nl-thanks" data-i18n="nl.thanks">Welcome, we’ll write when there’s something worth saying.</p>
+    </div>
+  </aside>
+
+  <div class="search-overlay" id="search-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="search-label">
+    <div class="search-overlay-top">
+      <button type="button" class="search-close" id="search-close" data-i18n="search.close">Close</button>
+    </div>
+    <div class="search-body">
+      <div class="search-label" id="search-label" data-i18n="search.label">Search</div>
+      <input type="search" class="search-field" id="search-field" data-i18n-placeholder="search.placeholder" placeholder="Search rugs, collections…" autocomplete="off" spellcheck="false">
+      <p class="search-hint" data-i18n="search.hint">Type a name, region, or collection.</p>
+      <ul class="search-results" id="search-results"></ul>
+      <p class="search-empty" id="search-empty" data-i18n="search.empty">No pieces match that yet.</p>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const syncShopChrome = () => {
+      const header = document.querySelector('.shop-header');
+      const topbar = document.querySelector('.shop-topbar');
+      const browse = document.getElementById('shop-browse');
+      const root = document.documentElement;
+      let stickyTop = 0;
+      if (topbar && !header?.classList.contains('is-fixed')) {
+        const pos = getComputedStyle(topbar).position;
+        if (pos === 'sticky' || pos === 'fixed') stickyTop += topbar.offsetHeight;
+      }
+      if (header) stickyTop += header.offsetHeight;
+      root.style.setProperty('--shop-header-h', stickyTop + 'px');
+      if (browse) root.style.setProperty('--shop-browse-h', browse.offsetHeight + 'px');
+    };
+    syncShopChrome();
+    this._chromeResize = syncShopChrome;
+    window.addEventListener('resize', this._chromeResize);
+    const headerEl = document.querySelector('.shop-header');
+    const topbarEl = document.querySelector('.shop-topbar');
+    if (typeof ResizeObserver !== 'undefined') {
+      this._chromeObs = new ResizeObserver(syncShopChrome);
+      if (headerEl) this._chromeObs.observe(headerEl);
+      if (topbarEl) this._chromeObs.observe(topbarEl);
+    }
+    const browseEl = document.getElementById('shop-browse');
+    if (browseEl && typeof ResizeObserver !== 'undefined') {
+      this._browseObs = new ResizeObserver(syncShopChrome);
+      this._browseObs.observe(browseEl);
+    }
+    this._syncShopChrome = syncShopChrome;
+
+    // Pin header + browse with position:fixed. Native sticky fails inside the
+    // dc-runtime shell (overflow pairing on html/body). Spacers stop layout jump.
+    const heroEl = document.getElementById('cat-hero');
+    let headerSpacer = document.getElementById('shop-header-spacer');
+    let browseSpacer = document.getElementById('shop-browse-spacer');
+    if (headerEl && !headerSpacer) {
+      headerSpacer = document.createElement('div');
+      headerSpacer.id = 'shop-header-spacer';
+      headerSpacer.setAttribute('aria-hidden', 'true');
+      headerEl.parentNode.insertBefore(headerSpacer, headerEl);
+    }
+    if (browseEl && !browseSpacer) {
+      browseSpacer = document.createElement('div');
+      browseSpacer.id = 'shop-browse-spacer';
+      browseSpacer.setAttribute('aria-hidden', 'true');
+      browseEl.parentNode.insertBefore(browseSpacer, browseEl);
+    }
+
+    const syncShopPin = () => {
+      if (!headerEl || !browseEl) return;
+      const topbarH = topbarEl ? topbarEl.offsetHeight : 0;
+      const y = window.pageYOffset || document.documentElement.scrollTop || 0;
+      const pinHeader = y >= Math.max(0, topbarH - 1);
+
+      if (pinHeader !== headerEl.classList.contains('is-fixed')) {
+        if (pinHeader) {
+          if (headerSpacer) headerSpacer.style.height = headerEl.offsetHeight + 'px';
+          headerEl.classList.add('is-fixed');
+        } else {
+          headerEl.classList.remove('is-fixed');
+          if (headerSpacer) headerSpacer.style.height = '0px';
+        }
+      }
+
+      const headerH = headerEl.offsetHeight;
+      document.documentElement.style.setProperty('--shop-header-h', headerH + 'px');
+
+      // Pin browse once the hero has cleared the fixed header.
+      const heroBottom = heroEl
+        ? heroEl.getBoundingClientRect().bottom
+        : (browseSpacer ? browseSpacer.getBoundingClientRect().top : browseEl.getBoundingClientRect().top);
+      const pinBrowse = pinHeader && heroBottom <= headerH + 1;
+
+      if (pinBrowse !== browseEl.classList.contains('is-fixed')) {
+        if (pinBrowse) {
+          if (browseSpacer) browseSpacer.style.height = browseEl.offsetHeight + 'px';
+          browseEl.classList.add('is-fixed');
+        } else {
+          browseEl.classList.remove('is-fixed');
+          if (browseSpacer) browseSpacer.style.height = '0px';
+        }
+      }
+
+      document.documentElement.style.setProperty('--shop-browse-h', browseEl.offsetHeight + 'px');
+    };
+    this._shopPinScroll = syncShopPin;
+    window.addEventListener('scroll', syncShopPin, { passive: true, capture: true });
+    document.addEventListener('scroll', syncShopPin, { passive: true, capture: true });
+    window.addEventListener('resize', syncShopPin);
+    syncShopPin();
+    this._syncShopPin = syncShopPin;
+
+    if (window.Idraren && Idraren.mountToTop) Idraren.mountToTop();
+
+    const scrollToCatalogue = () => {
+      syncShopChrome();
+      if (this._syncShopPin) this._syncShopPin();
+      const browse = document.getElementById('shop-browse');
+      const spacer = document.getElementById('shop-browse-spacer');
+      if (!browse) return;
+      const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--shop-header-h')) || headerEl?.offsetHeight || 108;
+      // Aim so the browse bar docks under the header — the "perfect view".
+      const marker = (spacer && spacer.offsetHeight > 0) ? spacer : (spacer || browse);
+      const top = marker.getBoundingClientRect().top + window.pageYOffset - headerH;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+      // Re-pin after the smooth scroll settles.
+      clearTimeout(this._cataloguePinT);
+      this._cataloguePinT = setTimeout(() => {
+        if (this._syncShopPin) this._syncShopPin();
+      }, 420);
+    };
+    const scrollToCatHero = () => {
+      const hero = document.getElementById('cat-hero');
+      if (!hero) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--shop-header-h')) || 108;
+      const top = hero.getBoundingClientRect().top + window.pageYOffset - headerH;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    };
+    this._scrollToCatalogue = scrollToCatalogue;
+    this._scrollToCatHero = scrollToCatHero;
+
+    // Shop mega menu
+    const shopItem = document.getElementById('nav-shop');
+    const shopTrigger = document.getElementById('nav-shop-trigger');
+    if (shopItem && shopTrigger) {
+      const setOpen = (open) => {
+        shopItem.classList.toggle('is-open', open);
+        shopTrigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      };
+      const openSoon = () => { clearTimeout(this._shopCloseT); setOpen(true); };
+      const closeSoon = () => {
+        clearTimeout(this._shopCloseT);
+        this._shopCloseT = setTimeout(() => setOpen(false), 180);
+      };
+      shopItem.addEventListener('mouseenter', openSoon);
+      shopItem.addEventListener('mouseleave', closeSoon);
+      const panel = shopItem.querySelector('.nav-panel');
+      if (panel) {
+        panel.addEventListener('mouseenter', openSoon);
+        panel.addEventListener('mouseleave', closeSoon);
+      }
+      // Hover opens the panel. Click on "Shop all" always goes to the
+      // catalogue (All products). Touch: first tap opens the panel so
+      // subcategories stay reachable; a second tap on the same link navigates.
+      this._shopToggle = (e) => {
+        const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        if (fine) {
+          clearTimeout(this._shopCloseT);
+          setOpen(false);
+          return; // allow default navigation → Shop.dc.html
+        }
+        if (!shopItem.classList.contains('is-open')) {
+          e.preventDefault();
+          clearTimeout(this._shopCloseT);
+          setOpen(true);
+          return;
+        }
+        clearTimeout(this._shopCloseT);
+        setOpen(false);
+      };
+      this._shopOutside = (e) => { if (!shopItem.contains(e.target)) setOpen(false); };
+      shopTrigger.addEventListener('click', this._shopToggle);
+      document.addEventListener('click', this._shopOutside);
+    }
+
+    // Scroll reveals
+    const bindReveals = () => {
+      const els = document.querySelectorAll('.reveal');
+      if (!motionOk || typeof IntersectionObserver === 'undefined') {
+        els.forEach((el) => el.classList.add('is-in'));
+        document.querySelectorAll('.product-card').forEach((el) => el.classList.add('is-in'));
+        return;
+      }
+      if (this._revealObs) this._revealObs.disconnect();
+      this._revealObs = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-in');
+          this._revealObs.unobserve(entry.target);
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+      els.forEach((el) => this._revealObs.observe(el));
+    };
+
+    const bindProductReveals = () => {
+      // First run is the page loading: entrance animations are wanted.
+      // Every later run is a filter change, where they are not.
+      const fromFilter = this._revealsBound === true;
+      this._revealsBound = true;
+      const items = document.querySelectorAll('.product-card:not(.is-hidden)');
+      if (!motionOk || typeof IntersectionObserver === 'undefined') {
+        items.forEach((el) => el.classList.add('is-in'));
+        return;
+      }
+      if (this._productObs) this._productObs.disconnect();
+      this._productObs = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-in');
+          this._productObs.unobserve(entry.target);
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+      items.forEach((el) => {
+        // Only reveal a card that has not been revealed yet. This runs on
+        // every category switch, and stripping is-in restarted the 28px
+        // slide + fade on cards already on screen - the images 'jumping'.
+        if (el.classList.contains('is-in')) return;
+        if (fromFilter) {
+          const r = el.getBoundingClientRect();
+          if (r.top < window.innerHeight && r.bottom > 0) {
+            // On screen because the filter put it here, not because the reader
+            // scrolled to it. Show it at once, with the entrance suppressed for
+            // one frame so it does not slide up from 28px.
+            // Flush synchronously rather than waiting on rAF: a backgrounded
+            // or throttled tab never runs the callback, which would leave the
+            // card with transitions permanently disabled.
+            el.classList.add('is-instant');
+            el.classList.add('is-in');
+            void el.offsetWidth;
+            el.classList.remove('is-instant');
+            return;
+          }
+        }
+        this._productObs.observe(el);
+      });
+    };
+    requestAnimationFrame(() => requestAnimationFrame(bindReveals));
+    this._revealRetry = setTimeout(bindReveals, 120);
+
+    const I18N = {
+      en: {
+        topbar: 'Handwoven in the Moroccan Atlas, shipped worldwide.',
+        'nav.shop': 'Shop',
+        'nav.shopLabel': 'Shop',
+        'nav.newArrivals': 'New Arrivals',
+        'nav.bestSellers': 'Best Sellers',
+        'nav.inStock': 'In stock',
+        'nav.sale': 'Customized',
+        'nav.collections': 'Collections',
+        'nav.samples': 'Samples',
+        'nav.story': 'About',
+        'nav.contact': 'Contact',
+        'nav.collaborate': 'Collaborate',
+        'nav.custom': 'Custom',
+        'nav.search': 'Search',
+        'nav.saved': 'Saved',
+        'nav.info': 'Info',
+        'nav.enquiry': 'Enquiry',
+        'shop.title': 'Our collection.',
+        'shop.body': 'Enquire to reserve a piece, shipping fees are set separately from the rug price.',
+        'shop.cue': 'Looking for trade access or custom sizing?',
+        'shop.cueCta': 'Start a custom enquiry',
+        'samples.eyebrow': 'Samples',
+        'samples.title': 'Feel the wool before you decide.',
+        'samples.lede': 'Photographs only tell you so much. We send samples so you can put the wool in your own light, against your own floor, and take your time with it.',
+        'samples.request': 'Samples are sent on request. Write to us and tell us what you are working on.',
+        'samples.custom': 'Every sample can be adapted — colour, texture, and the materials or details where it makes sense. We work that out with you directly.',
+        'samples.fine': 'Images shown are for reference. Final samples are prepared for each enquiry.',
+        'samples.cta': 'Request a sample',
+        'shop.empty': 'No pieces match these filters.',
+        'product.view': 'View piece',
+        'cat.all': 'All',
+        'spot.cta.all': 'Browse all pieces',
+        'spot.cta.new': 'Browse new arrivals',
+        'spot.cta.bestsellers': 'Browse best sellers',
+        'spot.cta.instock': 'Browse in stock',
+        'spot.cta.sale': 'Browse customized pieces',
+        'spot.cta.collections': 'Browse collections',
+        'spot.cta.samples': 'Browse samples',
+        'spot.cta.col': 'Browse this collection',
+        'ctx.all.title': 'The full house.',
+        'ctx.all.body': 'Every piece in the catalogue, browse by mood, or refine below.',
+        'ctx.new.title': 'Fresh from the loom.',
+        'ctx.new.body': 'Recent arrivals from the Atlas, one of a kind, held until enquiry.',
+        'ctx.bestsellers.title': 'Pieces rooms return to.',
+        'ctx.bestsellers.body': 'The rugs clients ask for again, quiet presence, strong character.',
+        'ctx.instock.title': 'Ready to ship.',
+        'ctx.instock.body': 'In hand now, enquire to reserve; we confirm timing from the house.',
+        'ctx.sale.body': 'Rugs tailored to your space, size, colour, and weave decided in conversation.',
+        'ctx.collections.title': 'Curated paths through the Atlas.',
+        'ctx.collections.body': 'Working collection titles, choose a line below, or browse them all.',
+        'ctx.samples.title': 'Wool in hand before you commit.',
+        'ctx.samples.body': 'Sample pieces and swatches for studios, showrooms, and site reviews.',
+        'col.all': 'All collections',
+        'col.atlas': 'Atlas',
+        'col.rabat': 'Rabat',
+        'col.anfa': 'Anfa',
+        'col.sahara': 'Sahara',
+        'ctx.col.atlas': 'Pale fields and quiet geometry, light held in highland wool.',
+        'ctx.col.rabat': 'City weaving, finer knots, formal pattern, urban restraint.',
+        'ctx.col.anfa': 'Coastal light and softer palettes, open, contemporary rooms.',
+        'ctx.col.sahara': 'Warm terracotta notes and sun-faded pattern, south and east.',
+        'filter.size': 'Size',
+        'filter.colour': 'Colour',
+        'filter.fibre': 'Fibre',
+        'filter.collection': 'Collection',
+        'filter.material': 'Material',
+        'filter.sort': 'Sort · Featured',
+        'filter.sortPrefix': 'Sort',
+        'opt.size.all': 'All sizes',
+        'opt.size.4x6': '120 × 180 cm (4 × 6 ft)',
+        'opt.size.5x7': '150 × 210 cm (5 × 7 ft)',
+        'opt.size.5x8': '150 × 240 cm (5 × 8 ft)',
+        'opt.size.6x8': '180 × 240 cm (6 × 8 ft)',
+        'opt.size.6x9': '180 × 270 cm (6 × 9 ft)',
+        'opt.colour.all': 'All colours',
+        'opt.colour.neutral': 'Neutral',
+        'opt.colour.warm': 'Warm',
+        'opt.colour.multi': 'Multicolour',
+        'opt.colour.dark': 'Dark',
+        'opt.fibre.all': 'All fibres',
+        'opt.fibre.knots': 'Knots',
+        'opt.fibre.flatweave': 'Flat weave',
+        'opt.col.all': 'All collections',
+        'opt.material.all': 'All materials',
+        'opt.material.wool': 'Wool',
+        'opt.material.silk': 'Silk',
+        'opt.material.bamboo': 'Bamboo',
+        'opt.sort.featured': 'Featured',
+        'opt.sort.newest': 'Newest',
+        'opt.sort.priceAsc': 'Price · Low to high',
+        'opt.sort.priceDesc': 'Price · High to low',
+        'opt.sort.name': 'Name · A–Z',
+        'nl.eyebrow': 'A letter from the Atlas',
+        'nl.title': 'Once a month. No more.',
+        'nl.body': 'New arrivals, artisan notes and quiet styling, sent to your inbox.',
+        'nl.submit': 'Join →',
+        'nl.thanks': 'Welcome, we’ll write when there’s something worth saying.',
+        'search.close': 'Close',
+        'search.label': 'Search',
+        'search.placeholder': 'Search rugs, collections…',
+        'search.hint': 'Type a name, region, or collection.',
+        'search.empty': 'No pieces match that yet.',
+        'footer.letters': 'Letters from the Atlas.',
+        'footer.lettersBody': 'New arrivals, artisan stories, and styling notes. Once a month, no more.',
+        'footer.email': 'Your email address',
+        'footer.subscribe': 'Subscribe',
+        'footer.tagline': 'Handwoven in the Atlas. shipped worldwide.',
+        'footer.house': 'House',
+        'footer.help': 'Info',
+        'footer.shipping': 'Shipping & VAT',
+        'footer.cancel': 'Cancellations',
+        'footer.size': 'Size',
+        'footer.care': 'Care',
+        'footer.privacy': 'Privacy Policy',
+        'footer.terms': 'Terms & Conditions',
+      },
+      fr: {
+        topbar: 'Tissé main dans l’Atlas, expédié dans le monde entier.',
+        'nav.shop': 'Boutique',
+        'nav.shopLabel': 'Boutique',
+        'nav.newArrivals': 'Nouveautés',
+        'nav.bestSellers': 'Meilleures ventes',
+        'nav.inStock': 'En stock',
+        'nav.sale': 'Personnalisé',
+        'nav.collections': 'Collections',
+        'nav.samples': 'Échantillons',
+        'nav.story': 'Histoire',
+        'nav.contact': 'Contact',
+        'nav.collaborate': 'Collaborer',
+        'nav.custom': 'Sur mesure',
+        'nav.search': 'Rechercher',
+        'nav.saved': 'Enregistrés',
+        'nav.info': 'Infos',
+        'nav.enquiry': 'Demande',
+        'shop.title': 'Notre collection.',
+        'shop.body': 'Faites une demande pour réserver une pièce, les frais d’expédition sont fixés à part du prix du tapis.',
+        'shop.cue': 'Vous cherchez un accès trade ou des formats sur mesure ?',
+        'shop.cueCta': 'Commencer une demande sur mesure',
+        'samples.eyebrow': 'Échantillons',
+        'samples.title': 'Touchez la laine avant de choisir.',
+        'samples.lede': 'Une photo ne dit pas tout. Nous envoyons des échantillons pour que vous puissiez voir la laine dans votre lumière, sur votre sol, et prendre le temps qu’il faut.',
+        'samples.request': 'Les échantillons sont envoyés sur demande. Écrivez-nous en nous disant sur quoi vous travaillez.',
+        'samples.custom': 'Chaque échantillon peut être adapté — couleur, texture et matières ou finitions, lorsque cela a du sens. Nous en convenons directement avec vous.',
+        'samples.fine': 'Images données à titre de référence. Les échantillons définitifs sont préparés pour chaque demande.',
+        'samples.cta': 'Demander un échantillon',
+        'shop.empty': 'Aucune pièce ne correspond à ces filtres.',
+        'product.view': 'Voir la pièce',
+        'cat.all': 'Tous',
+        'spot.cta.all': 'Parcourir toutes les pièces',
+        'spot.cta.new': 'Parcourir les nouveautés',
+        'spot.cta.bestsellers': 'Parcourir les meilleures ventes',
+        'spot.cta.instock': 'Parcourir le stock',
+        'spot.cta.sale': 'Parcourir les pièces personnalisées',
+        'spot.cta.collections': 'Parcourir les collections',
+        'spot.cta.samples': 'Parcourir les échantillons',
+        'spot.cta.col': 'Parcourir cette collection',
+        'ctx.all.title': 'Toute la maison.',
+        'ctx.all.body': 'Chaque pièce du catalogue, parcourez par humeur, ou affinez ci-dessous.',
+        'ctx.new.title': 'Fraîchement sorti du métier.',
+        'ctx.new.body': 'Nouveautés de l’Atlas, pièces uniques, réservées sur demande.',
+        'ctx.bestsellers.title': 'Les pièces qu’on retrouve.',
+        'ctx.bestsellers.body': 'Les tapis que les clients redemandent, présence calme, caractère fort.',
+        'ctx.instock.title': 'Prêt à expédier.',
+        'ctx.instock.body': 'En main maintenant, demandez pour réserver ; nous confirmons les délais.',
+        'ctx.sale.body': 'Tapis adaptés à votre espace, taille, couleur et tissage décidés en conversation.',
+        'ctx.collections.title': 'Chemins curatés à travers l’Atlas.',
+        'ctx.collections.body': 'Titres provisoires, choisissez une ligne ci-dessous, ou parcourez tout.',
+        'ctx.samples.title': 'La laine en main avant de décider.',
+        'ctx.samples.body': 'Pièces échantillons et swatches pour studios, showrooms et revues de chantier.',
+        'col.all': 'Toutes les collections',
+        'col.atlas': 'Atlas',
+        'col.rabat': 'Rabat',
+        'col.anfa': 'Anfa',
+        'col.sahara': 'Sahara',
+        'ctx.col.atlas': 'Champs pâles et géométrie discrète, lumière tenue dans la laine des hauts.',
+        'ctx.col.rabat': 'Tissage citadin, nœuds plus fins, motif formel, retenue urbaine.',
+        'ctx.col.anfa': 'Lumière du littoral et palettes plus douces, intérieurs ouverts et contemporains.',
+        'ctx.col.sahara': 'Notes terracotta et motifs adoucis par le soleil, sud et est.',
+        'filter.size': 'Taille',
+        'filter.colour': 'Couleur',
+        'filter.fibre': 'Fibre',
+        'filter.collection': 'Collection',
+        'filter.material': 'Matière',
+        'filter.sort': 'Tri · Sélection',
+        'filter.sortPrefix': 'Tri',
+        'opt.size.all': 'Toutes les tailles',
+        'opt.size.4x6': '120 × 180 cm (4 × 6 ft)',
+        'opt.size.5x7': '150 × 210 cm (5 × 7 ft)',
+        'opt.size.5x8': '150 × 240 cm (5 × 8 ft)',
+        'opt.size.6x8': '180 × 240 cm (6 × 8 ft)',
+        'opt.size.6x9': '180 × 270 cm (6 × 9 ft)',
+        'opt.colour.all': 'Toutes les couleurs',
+        'opt.colour.neutral': 'Neutre',
+        'opt.colour.warm': 'Chaud',
+        'opt.colour.multi': 'Multicolore',
+        'opt.colour.dark': 'Foncé',
+        'opt.fibre.all': 'Toutes les fibres',
+        'opt.fibre.knots': 'Nouée',
+        'opt.fibre.flatweave': 'Tissage plat',
+        'opt.col.all': 'Toutes les collections',
+        'opt.material.all': 'Toutes les matières',
+        'opt.material.wool': 'Laine',
+        'opt.material.silk': 'Soie',
+        'opt.material.bamboo': 'Bambou',
+        'opt.sort.featured': 'Sélection',
+        'opt.sort.newest': 'Plus récents',
+        'opt.sort.priceAsc': 'Prix · Croissant',
+        'opt.sort.priceDesc': 'Prix · Décroissant',
+        'opt.sort.name': 'Nom · A–Z',
+        'nl.eyebrow': 'Une lettre de l’Atlas',
+        'nl.title': 'Une fois par mois. Pas plus.',
+        'nl.body': 'Nouveautés, notes d’artisans et styling calme, directement dans votre boîte.',
+        'nl.submit': 'Rejoindre →',
+        'nl.thanks': 'Bienvenue, nous écrivons quand il y a quelque chose à dire.',
+        'search.close': 'Fermer',
+        'search.label': 'Rechercher',
+        'search.placeholder': 'Rechercher tapis, collections…',
+        'search.hint': 'Nom, région ou collection.',
+        'search.empty': 'Aucune pièce ne correspond pour l’instant.',
+        'footer.letters': 'Lettres de l’Atlas.',
+        'footer.lettersBody': 'Nouveautés, histoires d’artisans et notes de style, une fois par mois, pas plus.',
+        'footer.email': 'Votre adresse e-mail',
+        'footer.subscribe': 'S’abonner',
+        'footer.tagline': 'Tissé main dans l’Atlas. Expédié dans le monde entier.',
+        'footer.house': 'Maison',
+        'footer.help': 'Info',
+        'footer.shipping': 'Livraison & TVA',
+        'footer.cancel': 'Annulations',
+        'footer.size': 'Tailles',
+        'footer.care': 'Entretien',
+        'footer.privacy': 'Politique de confidentialité',
+        'footer.terms': 'Conditions générales',
+      },
+    };
+
+    // Shop browse: category hero + pills + filters
+    const grid = document.getElementById('shop-grid');
+    const gridWrap = document.getElementById('shop-grid-wrap');
+    const countEl = document.getElementById('shop-count');
+    const catRow = document.getElementById('cat-row');
+    const colRow = document.getElementById('col-row');
+    const catHero = document.getElementById('cat-hero');
+    const catHeroImg = document.getElementById('cat-hero-img');
+    const catHeroTitle = document.getElementById('cat-hero-title');
+    const catHeroBody = document.getElementById('cat-hero-body');
+    const catHeroCta = document.getElementById('cat-hero-cta');
+    const filtersRoot = document.getElementById('shop-filters');
+    const shopState = { cat: 'all', col: 'all', size: 'all', colour: 'all', fibre: 'all', material: 'all', sort: 'featured' };
+    let lang = (localStorage.getItem('idraren-lang') === 'fr') ? 'fr' : 'en';
+
+    // Category hero covers — reuse existing client shots as wide banners
+    // (landscape B frames are already 1800×1200; no new rotated files).
+    const CAT_HERO = {
+      all: { img: './images/collection-banner-16x9-2.jpg', title: 'shop.title', body: 'ctx.all.body', cta: 'spot.cta.all' },
+      new: { img: './images/rugs/rug-52-b.jpg', title: 'nav.newArrivals', body: 'ctx.new.body', cta: 'spot.cta.new' },
+      bestsellers: { img: './images/rugs/rug-52-b.jpg', title: 'nav.bestSellers', body: 'ctx.bestsellers.body', cta: 'spot.cta.bestsellers' },
+      instock: { img: './images/rugs/rug-54-b.jpg', title: 'nav.inStock', body: 'ctx.instock.body', cta: 'spot.cta.instock' },
+      customized: { img: './images/rugs/rug-63-b.jpg', title: 'nav.sale', body: 'ctx.sale.body', cta: 'spot.cta.sale' },
+      collections: { img: './images/collection-banner-16x9-2.jpg', title: 'nav.collections', body: 'ctx.collections.body', cta: 'spot.cta.collections' },
+      samples: { img: './images/samples/sample-group.jpg', title: 'nav.samples', body: 'ctx.samples.body', cta: 'spot.cta.samples' },
+      'col-atlas': { img: './images/rugs/rug-52-b.jpg', title: 'col.atlas', body: 'ctx.col.atlas', cta: 'spot.cta.col' },
+      'col-rabat': { img: './images/rugs/rug-76-b.jpg', title: 'col.rabat', body: 'ctx.col.rabat', cta: 'spot.cta.col' },
+      'col-anfa': { img: './images/rugs/rug-63-b.jpg', title: 'col.anfa', body: 'ctx.col.anfa', cta: 'spot.cta.col' },
+      'col-sahara': { img: './images/rugs/rug-67-b.jpg', title: 'col.sahara', body: 'ctx.col.sahara', cta: 'spot.cta.col' },
+    };
+
+    const resetRefineFilters = () => {
+      shopState.size = 'all';
+      shopState.colour = 'all';
+      shopState.fibre = 'all';
+      shopState.material = 'all';
+      shopState.sort = 'featured';
+      if (!filtersRoot) return;
+      filtersRoot.querySelectorAll('.shop-dd').forEach((dd) => {
+        const key = dd.getAttribute('data-filter');
+        if (!key) return;
+        dd.querySelectorAll('.shop-dd-option').forEach((opt) => {
+          const val = opt.getAttribute('data-value');
+          const isDefault = key === 'sort' ? val === 'featured' : val === 'all';
+          opt.classList.toggle('is-active', isDefault);
+        });
+      });
+    };
+
+    const syncUrl = () => {
+      const params = new URLSearchParams();
+      if (shopState.cat !== 'all') params.set('cat', shopState.cat);
+      if (shopState.cat === 'collections' && shopState.col !== 'all') params.set('col', shopState.col);
+      const qs = params.toString();
+      history.replaceState(null, '', qs ? ('?' + qs) : window.location.pathname);
+    };
+
+    const updateCatHero = () => {
+      let key = shopState.cat;
+      if (shopState.cat === 'collections' && shopState.col !== 'all') {
+        key = 'col-' + shopState.col;
+      }
+      const data = CAT_HERO[key] || CAT_HERO.all;
+      const dict = I18N[lang] || I18N.en;
+      const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const applyCopy = () => {
+        if (catHeroTitle) {
+          catHeroTitle.setAttribute('data-i18n', data.title);
+          catHeroTitle.textContent = dict[data.title] || '';
+        }
+        if (catHeroBody) {
+          catHeroBody.setAttribute('data-i18n', data.body);
+          catHeroBody.textContent = dict[data.body] || '';
+        }
+        if (catHeroCta) {
+          catHeroCta.setAttribute('data-i18n', data.cta);
+          catHeroCta.textContent = dict[data.cta] || '';
+        }
+      };
+
+      const finishReady = () => {
+        if (catHero) {
+          catHero.classList.remove('is-swap');
+          void catHero.offsetWidth;
+          requestAnimationFrame(() => catHero.classList.add('is-ready'));
+        }
+      };
+
+      const swap = () => {
+        applyCopy();
+        if (catHeroImg && data.img) {
+          const applyReady = () => finishReady();
+          if (catHeroImg.getAttribute('src') !== data.img) {
+            catHeroImg.onload = applyReady;
+            catHeroImg.src = data.img;
+            if (catHeroImg.complete) applyReady();
+          } else {
+            applyReady();
+          }
+          catHeroImg.alt = (dict[data.title] || '').replace(/\.$/, '');
+        } else {
+          finishReady();
+        }
+      };
+
+      clearTimeout(this._catHeroSwapT);
+      if (catHero && motionOk && catHero.classList.contains('is-ready')) {
+        catHero.classList.add('is-swap');
+        catHero.classList.remove('is-ready');
+        this._catHeroSwapT = setTimeout(swap, 280);
+      } else {
+        if (catHero) catHero.classList.remove('is-ready');
+        swap();
+      }
+    };
+
+    const movePillThumb = (row, thumb, attr, value) => {
+      if (window.matchMedia('(max-width: 640px)').matches) return;
+      if (!row || !thumb) return;
+      const active = row.querySelector('button[' + attr + '="' + value + '"]');
+      if (!active) {
+        thumb.style.opacity = '0';
+        row.classList.remove('is-thumb-ready');
+        return;
+      }
+      const rowRect = row.getBoundingClientRect();
+      const btnRect = active.getBoundingClientRect();
+      const x = btnRect.left - rowRect.left + row.scrollLeft;
+      thumb.style.width = btnRect.width + 'px';
+      thumb.style.height = btnRect.height + 'px';
+      thumb.style.transform = 'translate3d(' + x + 'px, 0, 0)';
+      row.classList.add('is-thumb-ready');
+    };
+
+    const catPillThumb = document.getElementById('cat-pill-thumb');
+    const colPillThumb = document.getElementById('col-pill-thumb');
+
+    const scrollActivePill = (row, attr, value) => {
+      if (!row) return;
+      const active = row.querySelector('button[' + attr + '="' + value + '"]');
+      if (!active) return;
+      // scrollIntoView scrolls every scrollable ancestor, the document
+      // included: with the browse bar sticky under the header the pill counts
+      // as partly hidden, so the page slid vertically on each category change.
+      // Scroll the pill strip itself and leave the page where it is.
+      const target = active.offsetLeft - (row.clientWidth - active.offsetWidth) / 2;
+      const max = row.scrollWidth - row.clientWidth;
+      row.scrollTo({ left: Math.max(0, Math.min(target, max)), behavior: 'smooth' });
+    };
+
+    const updateBrowseChrome = () => {
+      if (catRow) {
+        catRow.querySelectorAll('button[data-cat]').forEach((btn) => {
+          btn.classList.toggle('is-active', btn.getAttribute('data-cat') === shopState.cat);
+        });
+        scrollActivePill(catRow, 'data-cat', shopState.cat);
+        requestAnimationFrame(() => movePillThumb(catRow, catPillThumb, 'data-cat', shopState.cat));
+      }
+      if (colRow) {
+        colRow.classList.toggle('is-open', shopState.cat === 'collections');
+        colRow.querySelectorAll('button[data-col]').forEach((btn) => {
+          btn.classList.toggle('is-active', btn.getAttribute('data-col') === shopState.col);
+        });
+        if (shopState.cat === 'collections') {
+          scrollActivePill(colRow, 'data-col', shopState.col);
+          requestAnimationFrame(() => movePillThumb(colRow, colPillThumb, 'data-col', shopState.col));
+        }
+      }
+      if (this._syncShopChrome) requestAnimationFrame(this._syncShopChrome);
+    };
+
+    const refreshFilterLabels = () => {
+      const dict = I18N[lang] || I18N.en;
+      if (!filtersRoot) return;
+      filtersRoot.querySelectorAll('.shop-dd').forEach((dd) => {
+        const key = dd.getAttribute('data-filter');
+        const value = shopState[key];
+        const labelEl = dd.querySelector('.shop-dd-label');
+        const activeOpt = dd.querySelector('.shop-dd-option[data-value="' + value + '"]');
+        const baseKey = labelEl && labelEl.getAttribute('data-base');
+        const base = (baseKey && dict[baseKey]) || (labelEl && labelEl.textContent) || '';
+        if (key === 'sort') {
+          const optKey = activeOpt && activeOpt.getAttribute('data-i18n');
+          const sortLabel = (optKey && dict[optKey]) || (activeOpt && activeOpt.textContent) || dict['opt.sort.featured'];
+          if (labelEl) labelEl.textContent = (dict['filter.sortPrefix'] || 'Sort') + ' · ' + sortLabel;
+          dd.classList.toggle('is-active', value !== 'featured');
+        } else {
+          const isAll = value === 'all';
+          if (labelEl) {
+            if (isAll) labelEl.textContent = base;
+            else {
+              const optKey = activeOpt && activeOpt.getAttribute('data-i18n');
+              const optLabel = (optKey && dict[optKey]) || (activeOpt && activeOpt.textContent) || value;
+              labelEl.textContent = base + ' · ' + optLabel;
+            }
+          }
+          dd.classList.toggle('is-active', !isAll);
+        }
+        dd.querySelectorAll('.shop-dd-option').forEach((opt) => {
+          opt.classList.toggle('is-active', opt.getAttribute('data-value') === value);
+        });
+      });
+    };
+
+    const samplesPanel = document.getElementById('samples-panel');
+    const shopToolbar = document.querySelector('.shop-toolbar');
+
+    const applyShopFilters = () => {
+      // Samples swaps the catalogue out entirely - the refine bar and piece
+      // count describe rugs for sale, which these are not.
+      const samplesOn = shopState.cat === 'samples';
+      if (samplesPanel) samplesPanel.hidden = !samplesOn;
+      if (gridWrap) gridWrap.hidden = samplesOn;
+      if (shopToolbar) shopToolbar.hidden = samplesOn;
+      if (samplesOn) {
+        // Still sync the chips and close the collections sub-row: returning
+        // early skipped updateBrowseChrome(), so Samples showed its panel
+        // while the previous category stayed lit.
+        updateBrowseChrome();
+        return;
+      }
+      if (!grid) return;
+      if (gridWrap) gridWrap.classList.add('is-switching');
+      clearTimeout(this._gridSwitchT);
+      this._gridSwitchT = setTimeout(() => {
+        if (gridWrap) gridWrap.classList.remove('is-switching');
+      }, 320);
+      const cards = Array.prototype.slice.call(grid.querySelectorAll('.product-card'));
+      let visible = 0;
+      cards.forEach((card) => {
+        const tile = card.querySelector('.product-tile');
+        if (!tile) return;
+        const cats = (tile.getAttribute('data-cats') || '').split(/\s+/);
+        const sizeOk = shopState.size === 'all' || tile.getAttribute('data-size') === shopState.size;
+        const colourOk = shopState.colour === 'all' || tile.getAttribute('data-colour') === shopState.colour;
+        const fibreOk = shopState.fibre === 'all' || tile.getAttribute('data-fibre') === shopState.fibre;
+        const materialOk = shopState.material === 'all' || tile.getAttribute('data-material') === shopState.material;
+        // Collection is now a first-class filter, so it applies in every
+        // category, not only inside the "Collections" browse view.
+        const collectionOk = shopState.col === 'all' || tile.getAttribute('data-collection') === shopState.col;
+
+        let catOk = false;
+        if (shopState.cat === 'all') {
+          catOk = true;
+        } else if (shopState.cat === 'collections') {
+          catOk = cats.indexOf('collections') !== -1;
+        } else {
+          catOk = cats.indexOf(shopState.cat) !== -1;
+        }
+
+        const show = catOk && sizeOk && colourOk && fibreOk && materialOk && collectionOk;
+        card.classList.toggle('is-hidden', !show);
+        if (show) visible += 1;
+      });
+
+      const sorter = (a, b) => {
+        const ta = a.querySelector('.product-tile');
+        const tb = b.querySelector('.product-tile');
+        if (!ta || !tb) return 0;
+        const pa = Number(ta.getAttribute('data-price')) || 0;
+        const pb = Number(tb.getAttribute('data-price')) || 0;
+        const oa = Number(ta.getAttribute('data-order')) || 0;
+        const ob = Number(tb.getAttribute('data-order')) || 0;
+        const na = (ta.getAttribute('data-name') || '').toLowerCase();
+        const nb = (tb.getAttribute('data-name') || '').toLowerCase();
+        const newA = ((ta.getAttribute('data-cats') || '').split(/\s+/).indexOf('new') !== -1) ? 0 : 1;
+        const newB = ((tb.getAttribute('data-cats') || '').split(/\s+/).indexOf('new') !== -1) ? 0 : 1;
+        if (shopState.sort === 'price-asc') return pa - pb || oa - ob;
+        if (shopState.sort === 'price-desc') return pb - pa || oa - ob;
+        if (shopState.sort === 'name') return na.localeCompare(nb) || oa - ob;
+        if (shopState.sort === 'newest') return newA - newB || oa - ob;
+        return oa - ob;
+      };
+      // appendChild on an existing child MOVES the node, which tears down and
+      // rebuilds its rendering - restarting transitions and forcing the image
+      // to repaint. Doing that to every card on every switch is the second
+      // half of the 'jumping'. Only touch the DOM when the order really changed.
+      // Compare against cards[], which querySelectorAll already returns in
+      // document order. grid.children is not usable here: the template wraps
+      // the tiles in a display:contents div, so it holds one node, not six.
+      const sorted = cards.slice().sort(sorter);
+      const orderChanged = sorted.some((card, i) => card !== cards[i]);
+      if (orderChanged) {
+        const frag = document.createDocumentFragment();
+        sorted.forEach((card) => frag.appendChild(card));
+        grid.appendChild(frag);
+      }
+
+      if (countEl) {
+        const n = String(visible).padStart(2, '0');
+        const label = lang === 'fr'
+          ? (visible === 1 ? ' pièce' : ' pièces')
+          : (visible === 1 ? ' piece' : ' pieces');
+        countEl.textContent = n + label;
+      }
+      if (gridWrap) gridWrap.classList.toggle('is-empty', visible === 0);
+
+      updateBrowseChrome();
+      refreshFilterLabels();
+      bindProductReveals();
+      if (this._syncShopChrome) requestAnimationFrame(this._syncShopChrome);
+    };
+
+    const setCollection = (col, opts) => {
+      const options = opts || {};
+      shopState.col = col || 'all';
+      if (shopState.cat !== 'collections') shopState.cat = 'collections';
+      if (options.resetFilters) resetRefineFilters();
+      // Mirror into the Collection dropdown so both controls agree.
+      const colDd = document.querySelector('.shop-dd[data-filter="col"]');
+      if (colDd) {
+        colDd.querySelectorAll('.shop-dd-option').forEach((o) => {
+          o.classList.toggle('is-active', o.getAttribute('data-value') === shopState.col);
+        });
+      }
+      applyShopFilters();
+      updateCatHero();
+      syncUrl();
+    };
+
+    const setCategory = (cat, opts) => {
+      const options = opts || {};
+      const next = cat || 'all';
+      const changed = next !== shopState.cat;
+      shopState.cat = next;
+      if (next !== 'collections') shopState.col = 'all';
+      if (changed && options.resetFilters !== false) resetRefineFilters();
+      applyShopFilters();
+      updateCatHero();
+      syncUrl();
+    };
+
+    // Switching category/collection from the in-page rows must NOT move the
+    // viewport, the controls are already on screen, so scrolling them away
+    // is the "page jumps" behaviour. Height is held across the swap so the
+    // grid can't collapse and re-expand under the cursor either.
+    const holdHeightDuring = (fn) => {
+      const wrap = document.getElementById('shop-grid-wrap') || document.getElementById('shop-grid');
+      if (!wrap) { fn(); return; }
+      // Holding the wrapper height stops the grid collapsing mid-swap, but it
+      // was released again straight away. If the new category is shorter the
+      // document shrinks, the browser clamps the scroll position, and the page
+      // visibly slides upward - the jump the client reported. So: remember
+      // where the reader was, and if the shorter page cannot hold that
+      // position, pad the wrapper by exactly the shortfall and restore it.
+      const y = window.pageYOffset;
+      const docBefore = document.documentElement.scrollHeight;
+      wrap.style.minHeight = wrap.getBoundingClientRect().height + 'px';
+      fn();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          wrap.style.minHeight = '';
+          const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+          if (y > maxScroll) {
+            const shortfall = Math.ceil(y - maxScroll);
+            wrap.style.minHeight = (wrap.getBoundingClientRect().height + shortfall) + 'px';
+          }
+          // force the new height to flush before scrolling, otherwise the
+          // browser is still clamping against the pre-padding document
+          void document.documentElement.scrollHeight;
+          if (Math.abs(window.pageYOffset - y) > 1) window.scrollTo(0, y);
+        });
+      });
+    };
+
+    if (catRow) {
+      catRow.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-cat]');
+        if (!btn) return;
+        holdHeightDuring(() => setCategory(btn.getAttribute('data-cat')));
+        // Bring the results into view. Clicked from the banner area, the new
+        // pieces sat below the fold and the page looked stuck. Runs after
+        // holdHeightDuring's two-frame restore so the two scrolls don't fight.
+        requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+          if (this._scrollToCatalogue) this._scrollToCatalogue();
+        })));
+      });
+    }
+    if (colRow) {
+      colRow.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-col]');
+        if (!btn) return;
+        holdHeightDuring(() => setCollection(btn.getAttribute('data-col')));
+        requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+          if (this._scrollToCatalogue) this._scrollToCatalogue();
+        })));
+      });
+    }
+    document.querySelectorAll('.nav-panel a[data-cat]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const cat = a.getAttribute('data-cat');
+        const col = a.getAttribute('data-col');
+        if (col) setCollection(col, { resetFilters: true });
+        else setCategory(cat);
+        if (this._scrollToCatHero) this._scrollToCatHero();
+      });
+    });
+
+    if (catHeroCta) {
+      catHeroCta.addEventListener('click', () => {
+        if (this._scrollToCatalogue) this._scrollToCatalogue();
+      });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlCat = urlParams.get('cat');
+    const urlCol = urlParams.get('col');
+    if (urlCat) {
+      shopState.cat = urlCat;
+      if (urlCat === 'collections' && urlCol) shopState.col = urlCol;
+      resetRefineFilters();
+    }
+
+    const closeAllDropdowns = () => {
+      if (!filtersRoot) return;
+      filtersRoot.querySelectorAll('.shop-dd.is-open').forEach((dd) => {
+        dd.classList.remove('is-open');
+        const t = dd.querySelector('.shop-dd-trigger');
+        if (t) t.setAttribute('aria-expanded', 'false');
+      });
+    };
+
+    if (filtersRoot) {
+      filtersRoot.addEventListener('click', (e) => {
+        const option = e.target.closest('.shop-dd-option');
+        const trigger = e.target.closest('.shop-dd-trigger');
+        const dd = e.target.closest('.shop-dd');
+        if (!dd) return;
+        e.stopPropagation();
+        if (option) {
+          const key = dd.getAttribute('data-filter');
+          const value = option.getAttribute('data-value');
+          if (key && value != null) shopState[key] = value;
+          dd.querySelectorAll('.shop-dd-option').forEach((o) => {
+            o.classList.toggle('is-active', o === option);
+          });
+          if (key === 'col' && colRow) {
+            colRow.querySelectorAll('button[data-col]').forEach((b) => {
+              b.classList.toggle('is-active', b.getAttribute('data-col') === value);
+            });
+          }
+          closeAllDropdowns();
+          applyShopFilters();
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            if (this._scrollToCatalogue) this._scrollToCatalogue();
+          }));
+          return;
+        }
+        if (trigger) {
+          const wasOpen = dd.classList.contains('is-open');
+          closeAllDropdowns();
+          if (!wasOpen) {
+            dd.classList.add('is-open');
+            trigger.setAttribute('aria-expanded', 'true');
+          }
+        }
+      });
+    }
+    this._filterOutside = (e) => {
+      if (filtersRoot && !filtersRoot.contains(e.target)) closeAllDropdowns();
+    };
+    document.addEventListener('click', this._filterOutside);
+    this._filterEsc = (e) => {
+      if (e.key === 'Escape') closeAllDropdowns();
+    };
+    document.addEventListener('keydown', this._filterEsc);
+
+    applyShopFilters();
+    if (this._syncShopChrome) this._syncShopChrome();
+    if (this._syncShopPin) this._syncShopPin();
+    // Deep link (?cat=…) lands on the docked browse view, not mid-hero.
+    if (urlCat) {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (this._scrollToCatalogue) this._scrollToCatalogue();
+      }));
+    }
+
+    // EN / FR
+    const applyLang = (next) => {
+      lang = next;
+      document.documentElement.lang = next;
+      localStorage.setItem('idraren-lang', next);
+      const dict = I18N[next] || I18N.en;
+      document.querySelectorAll('[data-i18n]').forEach((el) => {
+        const key = el.getAttribute('data-i18n');
+        if (key && dict[key] != null) el.textContent = dict[key];
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (key && dict[key] != null) el.setAttribute('placeholder', dict[key]);
+      });
+      document.querySelectorAll('.lang-toggle .lang-opt').forEach((opt) => {
+        opt.classList.toggle('is-on', opt.getAttribute('data-lang') === next);
+      });
+      updateCatHero();
+      applyShopFilters();
+    };
+    const setLang = (next) => {
+      if (next === lang) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        applyLang(next);
+        return;
+      }
+      document.documentElement.classList.add('is-lang-switching');
+      clearTimeout(this._langT);
+      this._langT = setTimeout(() => {
+        applyLang(next);
+        requestAnimationFrame(() => document.documentElement.classList.remove('is-lang-switching'));
+      }, 220);
+    };
+    applyLang(lang);
+    requestAnimationFrame(() => applyLang(lang));
+    this._langClick = (e) => {
+      const btn = e.target.closest && e.target.closest('.lang-toggle');
+      if (!btn) return;
+      e.preventDefault();
+      const hit = e.target.closest('.lang-opt');
+      if (hit && hit.getAttribute('data-lang')) setLang(hit.getAttribute('data-lang'));
+      else setLang(lang === 'en' ? 'fr' : 'en');
+    };
+    document.addEventListener('click', this._langClick);
+
+    // Search overlay (same catalog as Home shelf)
+    const searchCatalog = (window.Idraren && Idraren.getCatalog)
+      ? Idraren.getCatalog()
+      : [];
+    const searchOverlay = document.getElementById('search-overlay');
+    const searchField = document.getElementById('search-field');
+    const searchResults = document.getElementById('search-results');
+    const searchOpenBtn = document.getElementById('search-open');
+    const searchCloseBtn = document.getElementById('search-close');
+    const renderSearch = (query) => {
+      if (!searchResults || !searchOverlay) return;
+      const q = (query || '').trim().toLowerCase();
+      const hits = !q
+        ? searchCatalog.slice(0, 4)
+        : searchCatalog.filter((p) => (p.name + ' ' + p.note + ' ' + p.tags).toLowerCase().includes(q));
+      searchOverlay.classList.toggle('is-empty', hits.length === 0);
+      searchResults.innerHTML = hits.map((p) =>
+        '<li><a class="search-result" href="./Product.dc.html?id=' + p.id + '">' +
+          '<div class="search-result-thumb"><img src="' + p.image + '" alt=""></div>' +
+          '<div><div class="search-result-name">' + p.name + '</div>' +
+          '<p class="search-result-meta">' + p.note + '</p></div>' +
+          '<div class="search-result-price">' + p.price + '</div>' +
+        '</a></li>'
+      ).join('');
+    };
+    const openSearch = () => {
+      if (!searchOverlay) return;
+      searchOverlay.classList.add('is-open');
+      searchOverlay.setAttribute('aria-hidden', 'false');
+      document.documentElement.classList.add('search-open');
+      renderSearch(searchField ? searchField.value : '');
+      requestAnimationFrame(() => { if (searchField) searchField.focus(); });
+    };
+    const closeSearch = () => {
+      if (!searchOverlay) return;
+      searchOverlay.classList.remove('is-open');
+      searchOverlay.setAttribute('aria-hidden', 'true');
+      document.documentElement.classList.remove('search-open');
+      if (searchOpenBtn) searchOpenBtn.focus();
+    };
+    if (searchOpenBtn) searchOpenBtn.addEventListener('click', (e) => { e.preventDefault(); openSearch(); });
+    if (searchCloseBtn) searchCloseBtn.addEventListener('click', closeSearch);
+
+    // Mobile menu
+    const mmBtn = document.getElementById('mm-toggle');
+    const mmPanel = document.getElementById('mm-panel');
+    if (mmBtn && mmPanel) {
+      const closeMM = () => {
+        mmBtn.setAttribute('aria-expanded', 'false');
+        mmPanel.classList.remove('is-open');
+        mmPanel.setAttribute('aria-hidden', 'true');
+        document.documentElement.classList.remove('mm-open');
+      };
+      const openMM = () => {
+        mmBtn.setAttribute('aria-expanded', 'true');
+        mmPanel.classList.add('is-open');
+        mmPanel.setAttribute('aria-hidden', 'false');
+        document.documentElement.classList.add('mm-open');
+      };
+      mmBtn.addEventListener('click', () => mmPanel.classList.contains('is-open') ? closeMM() : openMM());
+      const mmCloseBtn = document.getElementById('mm-close');
+      if (mmCloseBtn) mmCloseBtn.addEventListener('click', closeMM);
+      mmPanel.querySelectorAll('a').forEach((a) => a.addEventListener('click', closeMM));
+      this._mmEsc = (e) => { if (e.key === 'Escape' && mmPanel.classList.contains('is-open')) closeMM(); };
+      document.addEventListener('keydown', this._mmEsc);
+    }
+
+    if (searchField) searchField.addEventListener('input', () => renderSearch(searchField.value));
+    this._searchKey = (e) => {
+      if (e.key === 'Escape' && searchOverlay && searchOverlay.classList.contains('is-open')) {
+        e.preventDefault();
+        closeSearch();
+      }
+      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        if (searchOverlay && searchOverlay.classList.contains('is-open')) closeSearch();
+        else openSearch();
+      }
+    };
+    document.addEventListener('keydown', this._searchKey);
+    this._searchDestroy = () => {
+      document.removeEventListener('keydown', this._searchKey);
+      document.documentElement.classList.remove('search-open');
+    };
+
+    if (window.Idraren) {
+      this._nl = Idraren.mountNewsletter({ delayMs: 8000 });
+    }
+
+    this._pillResize = () => {
+      movePillThumb(catRow, catPillThumb, 'data-cat', shopState.cat);
+      if (shopState.cat === 'collections') {
+        movePillThumb(colRow, colPillThumb, 'data-col', shopState.col);
+      }
+    };
+    window.addEventListener('resize', this._pillResize);
+    if (catRow) catRow.addEventListener('scroll', this._pillResize, { passive: true });
+  }
+  componentWillUnmount() {
+    clearTimeout(this._shopCloseT);
+    clearTimeout(this._revealRetry);
+    clearTimeout(this._langT);
+    clearTimeout(this._catHeroSwapT);
+    clearTimeout(this._gridSwitchT);
+    clearTimeout(this._cataloguePinT);
+    if (this._shopPinScroll) {
+      window.removeEventListener('scroll', this._shopPinScroll, true);
+      document.removeEventListener('scroll', this._shopPinScroll, true);
+      window.removeEventListener('resize', this._shopPinScroll);
+    }
+    if (this._pillResize) {
+      window.removeEventListener('resize', this._pillResize);
+      const catRowEl = document.getElementById('cat-row');
+      if (catRowEl) catRowEl.removeEventListener('scroll', this._pillResize);
+    }
+    if (this._chromeResize) window.removeEventListener('resize', this._chromeResize);
+    if (this._browseObs) this._browseObs.disconnect();
+    if (this._chromeObs) this._chromeObs.disconnect();
+    if (this._langClick) document.removeEventListener('click', this._langClick);
+    if (this._filterOutside) document.removeEventListener('click', this._filterOutside);
+    if (this._filterEsc) document.removeEventListener('keydown', this._filterEsc);
+    if (this._searchDestroy) this._searchDestroy();
+    if (this._revealObs) this._revealObs.disconnect();
+    if (this._productObs) this._productObs.disconnect();
+    if (this._nl && this._nl.destroy) this._nl.destroy();
+    const shopTrigger = document.getElementById('nav-shop-trigger');
+    if (shopTrigger && this._shopToggle) shopTrigger.removeEventListener('click', this._shopToggle);
+    if (this._shopOutside) document.removeEventListener('click', this._shopOutside);
+  }
+  renderVals() {
+    const h = React.createElement;
+    /* Canonical size table — every size is authored once here in both units so
+       filter labels, product notes and the PDP can never drift apart. */
+    const SIZES = {
+      '4x6': { cm: '120 × 180 cm', ft: '4 × 6 ft' },
+      '5x7': { cm: '150 × 210 cm', ft: '5 × 7 ft' },
+      '5x8': { cm: '150 × 240 cm', ft: '5 × 8 ft' },
+      '6x8': { cm: '180 × 240 cm', ft: '6 × 8 ft' },
+      '6x9': { cm: '180 × 270 cm', ft: '6 × 9 ft' },
+    };
+    const sizeLabel = (key) => {
+      const s = SIZES[key];
+      return s ? s.cm + ' (' + s.ft + ')' : key;
+    };
+    this._sizeLabel = sizeLabel;
+
+    const products = ((window.Idraren && Idraren.getCatalog) ? Idraren.getCatalog() : []).map((p) => Object.assign({}, p, {
+      size: p.sizeKey || '5x8',
+      fibre: p.fibreKey || 'knots',
+      note: p.region + ' · ' + sizeLabel(p.sizeKey || '5x8'),
+    }));
+
+    const productTiles = h('div', { style: { display: 'contents' } },
+      products.map((p, i) => h('div', {
+        key: i,
+        className: 'product-card',
+      },
+        h('a', {
+          href: './Product.dc.html?id=' + p.id,
+          className: 'product-tile',
+          'data-cats': p.cats,
+          'data-collection': p.collection,
+          'data-size': p.size,
+          'data-colour': p.colour,
+          'data-fibre': p.fibre,
+          'data-material': p.material,
+          'data-price': String(p.priceNum),
+          'data-name': p.name,
+          'data-order': String(i),
+        },
+          h('div', { className: 'product-media' },
+            h('img', { src: p.image, alt: p.name, loading: i > 1 ? 'lazy' : 'eager' }),
+            h('div', { className: 'product-copy' },
+              h('h2', { className: 'product-name' }, p.name),
+              h('div', { className: 'product-meta' },
+                h('span', null, p.note),
+                h('span', { className: 'product-price' }, p.price)
+              ),
+              h('span', { className: 'product-view', 'data-i18n': 'product.view' }, 'View piece')
+            )
+          )
+        )
+      ))
+    );
+
+    return { productTiles };
+  }
+}
+</script>
+</body>
+</html>

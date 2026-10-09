@@ -1,0 +1,2738 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js?v=20260913b"></script>
+<script src="./idraren.js?v=20261003nobg"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --idr-dark: #312F23;
+      --idr-ivory: #E8D8C8;
+      --idr-stone: #EDE6DE;
+      --idr-charcoal: #252522;
+      --idr-taupe: #A89F91;
+      /* Readable secondary text: --idr-taupe alone measures under 2.2:1 on
+         stone, far below the 4.5:1 minimum. Same hue, passes on both grounds. */
+      --idr-taupe-ink: #625A4F;
+      --idr-charcoal-08: rgba(37, 37, 34, 0.08);
+      /* Used by the gallery thumbnails but never declared, so their borders
+         fell back to full-strength currentColor instead of a faint hairline. */
+      --idr-charcoal-12: rgba(37, 37, 34, 0.12);
+      --idr-charcoal-40: rgba(37, 37, 34, 0.4);
+      --idr-ivory-70: rgba(232, 216, 200, 0.7);
+      --idr-ivory-65: rgba(232, 216, 200, 0.65);
+      --idr-ivory-40: rgba(232, 216, 200, 0.4);
+      --idr-ivory-12: rgba(232, 216, 200, 0.12);
+      --idr-ivory-10: rgba(232, 216, 200, 0.1);
+      --idr-ivory-92: rgba(232, 216, 200, 0.92);
+      --idr-inset: 48px;
+    }
+    html, body { margin: 0; padding: 0; background: var(--idr-stone); color: var(--idr-charcoal); }
+    html { overflow-x: clip; }
+    body {
+      font-family: 'Manrope', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.005em;
+      overflow-x: clip;
+    }
+    * { box-sizing: border-box; }
+    a { color: inherit; text-decoration: none; }
+    a:hover { opacity: 0.7; }
+    img { display: block; max-width: 100%; }
+    button { font: inherit; }
+
+    .idr-mark { display: inline-block; width: 138px; height: 52px; line-height: 0; vertical-align: middle; }
+    .idr-mark img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .idr-mark.is-light img {
+      filter: invert(1) sepia(0.35) saturate(0.9) hue-rotate(-8deg) brightness(0.94);
+    }
+    /* Header brand: name only. The full logo lockup is reserved for the
+       homepage intro and the footer. Matches Home.dc.html. */
+    .idr-wordmark {
+      display: inline-block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(20px, 2vw, 28px);
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: inherit;
+      line-height: 1;
+      margin-right: -0.3em;
+      position: relative;
+      top: -0.1em;
+    }
+
+    html.idr-smooth { scroll-behavior: auto; }
+    html.idr-smooth body { overscroll-behavior-y: none; }
+
+    .shop-topbar {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 24px;
+      background: var(--idr-dark);
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--idr-ivory);
+    }
+
+    .shop-header {
+      padding: 28px var(--idr-inset);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center;
+      gap: 20px;
+      border-bottom: 1px solid var(--idr-charcoal-08);
+      background: var(--idr-stone);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .shop-nav,
+    .shop-utils {
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 500;
+      white-space: nowrap;
+      /* Client: the menu line should read lighter. Matches .hero-nav on Home. */
+      color: var(--idr-taupe-ink);
+    }
+    .shop-nav { letter-spacing: 0.2em; }
+    .shop-utils { letter-spacing: 0; }    .shop-nav a:hover,
+    .shop-utils a:hover,
+    .shop-utils button:hover { color: var(--idr-charcoal); }
+    .shop-nav {
+      display: flex;
+      gap: clamp(16px, 2vw, 28px);
+      align-items: center;
+      justify-content: center;
+    }
+    .shop-nav > a,
+    .shop-nav .nav-item > a {
+      display: inline-flex;
+      align-items: center;
+      line-height: 1;
+    }
+    .shop-utils {
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+    .shop-utils .search-open-btn,
+    .shop-utils .saved-link {
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 0;
+      margin: 0;
+    }
+    .shop-utils .search-open-btn svg,
+    .shop-utils .saved-icon {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+    .shop-utils .lang-toggle {
+      gap: 6px;
+      margin: 0;
+    }
+    .shop-utils .lang-toggle .lang-code.is-on {
+      margin-inline-end: -0.18em;
+    }
+    .shop-utils .info-menu-trigger,
+    .shop-utils > a:not(.saved-link) {
+      letter-spacing: 0.2em;
+      margin-inline-end: -0.2em;
+    }
+
+    .search-open-btn {
+      border: none;
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      cursor: pointer;
+    }
+    .search-open-btn:hover { opacity: 0.7; }
+
+    .lang-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0;
+      margin: 0;
+      border: none;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .lang-toggle:hover { opacity: 1; }
+    .lang-opt { position: relative; opacity: 0.42; transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+    .lang-opt.is-on { opacity: 1; }
+    .lang-opt.is-on::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: -4px;
+      height: 1px;
+      background: currentColor;
+    }
+    .lang-sep { display: none; }
+    .lang-toggle svg { flex-shrink: 0; opacity: 0.85; width: 19px; height: 19px; }
+    .lang-code { font-size: 11px; letter-spacing: 0.18em; opacity: 0; width: 0; overflow: hidden; transition: opacity 0.35s ease; }
+    .lang-code.is-on { opacity: 1; width: auto; }
+    .lang-copy {
+      transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1), transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    html.is-lang-switching .lang-copy {
+      opacity: 0;
+      transform: translate3d(0, 6px, 0);
+    }
+
+    .nav-item { position: relative; display: flex; align-items: center; }
+    .nav-panel {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translate(-50%, 6px);
+      z-index: 60;
+      width: max-content;
+      min-width: 420px;
+      max-width: min(520px, 92vw);
+      padding-top: 14px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.4s ease, visibility 0.35s;
+      white-space: normal;
+    }
+    .nav-panel::before {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; top: 0;
+      height: 14px;
+    }
+    .nav-panel-inner {
+      background: var(--idr-stone);
+      color: var(--idr-charcoal);
+      border: 1px solid var(--idr-charcoal-08);
+      padding: 22px 28px 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px 40px;
+    }
+    .nav-item:hover .nav-panel,
+    .nav-item:focus-within .nav-panel,
+    .nav-item.is-open .nav-panel {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translate(-50%, 0);
+    }
+    .nav-panel-col { display: flex; flex-direction: column; gap: 10px; }
+    .nav-panel-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 15px;
+      color: var(--idr-taupe);
+      margin-bottom: 2px;
+      text-transform: none;
+      letter-spacing: 0.02em;
+    }
+    .nav-panel a {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--idr-charcoal);
+      width: fit-content;
+      border-bottom: 1px solid transparent;
+      padding-bottom: 1px;
+    }
+    .nav-panel a:hover { opacity: 1; border-bottom-color: var(--idr-charcoal); }
+    .nav-panel-note {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--idr-taupe);
+      text-transform: none;
+      letter-spacing: 0.01em;
+      margin-top: 4px;
+    }
+
+    .pdp-crumb {
+      padding: 20px var(--idr-inset) 12px;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--idr-taupe);
+      line-height: 1.4;
+    }
+    .pdp-crumb a { color: inherit; }
+    .pdp-crumb a:hover { color: var(--idr-charcoal); }
+    .pdp-crumb-sep { margin: 0 10px; opacity: 0.5; }
+
+    .pdp {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      gap: 48px 64px;
+      align-items: start;
+      padding: 0 var(--idr-inset) 96px;
+    }
+    .pdp-gallery {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .pdp-gallery-thumbs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pdp-gallery-thumb {
+      width: 72px;
+      aspect-ratio: 12 / 13;
+      padding: 0;
+      border: 1px solid var(--idr-charcoal-12);
+      background: var(--idr-ivory);
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 0.25s ease, opacity 0.25s ease;
+    }
+    .pdp-gallery-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+      pointer-events: none;
+    }
+    .pdp-gallery-thumb:hover { border-color: var(--idr-charcoal-40); }
+    .pdp-gallery-thumb.is-on {
+      border-color: var(--idr-charcoal);
+    }
+    .pdp-media {
+      position: relative;
+      aspect-ratio: 2 / 3;
+      overflow: hidden;
+      background: transparent;
+      cursor: zoom-in;
+      border: none;
+      padding: 0;
+      width: 100%;
+      display: block;
+      font: inherit;
+      color: inherit;
+    }
+    .pdp-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+      transform: scale(1);
+      transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+    }
+    .pdp-zoom-hint {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--idr-ivory);
+      background: var(--idr-dark-70, rgba(49, 47, 35, 0.7));
+      padding: 8px 12px;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .pdp-media:hover .pdp-zoom-hint { opacity: 1; }
+    }
+
+    .pdp-zoom {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      /* Solid: the rug PNGs are cut out, so a see-through wash let the page
+         show behind the zoomed image. */
+      background: var(--idr-stone);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.4s ease, visibility 0.4s;
+      cursor: zoom-out;
+    }
+    .pdp-zoom.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .pdp-zoom img {
+      max-width: min(920px, 100%);
+      max-height: 88vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      transform: scale(0.97);
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .pdp-zoom.is-open img { transform: scale(1); }
+    .pdp-zoom-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      z-index: 2;
+      border: none;
+      background: transparent;
+      color: var(--idr-charcoal);
+      font-size: 28px;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.7;
+      font-family: inherit;
+      padding: 8px;
+    }
+    .pdp-zoom-nav {
+      position: absolute;
+      top: 50%;
+      z-index: 2;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--idr-charcoal-12, rgba(37, 37, 34, 0.14));
+      background: rgba(242, 234, 226, 0.92);
+      color: var(--idr-charcoal);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font: inherit;
+      transition: opacity 0.25s ease, background 0.25s ease;
+    }
+    .pdp-zoom-nav:hover { background: var(--idr-stone, #ede6de); }
+    .pdp-zoom-nav[hidden] { display: none; }
+    .pdp-zoom-prev { left: max(16px, 2vw); }
+    .pdp-zoom-next { right: max(16px, 2vw); }
+    .pdp-zoom-nav svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+    }
+    .pdp-zoom-close:hover { opacity: 1; }
+    .pdp-info {
+      padding-top: 12px;
+      max-width: 420px;
+    }
+    .pdp-kicker {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--idr-taupe);
+      margin: 0 0 18px;
+    }
+    .pdp-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 4.2vw, 52px);
+      font-weight: 600;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--idr-charcoal);
+      margin: 0 0 18px;
+    }
+    .pdp-price {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--idr-charcoal);
+      margin: 0 0 8px;
+    }
+    .pdp-note {
+      font-size: 14px;
+      color: var(--idr-taupe);
+      margin: 0 0 28px;
+    }
+    .pdp-body {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--idr-charcoal);
+      margin: 0 0 36px;
+      max-width: 38ch;
+    }
+    .pdp-specs {
+      list-style: none;
+      margin: 0 0 40px;
+      padding: 0;
+      border-top: 1px solid var(--idr-charcoal-08);
+    }
+    .pdp-specs li {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--idr-charcoal-08);
+      font-size: 13px;
+    }
+    .pdp-specs .label {
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-size: 11px;
+      color: var(--idr-taupe);
+    }
+    .pdp-specs .value {
+      color: var(--idr-charcoal);
+      text-align: right;
+      font-weight: 500;
+    }
+    /* Actions share one column width so every edge lines up */
+    .pdp-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .pdp-cta-row {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .pdp-cta-row .pdp-cta { flex: 1 1 auto; }
+    .pdp-cta-row .pdp-wish { flex: 0 0 auto; }
+    .pdp-cta-row--pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .pdp-cta-row--pair .pdp-wish { padding-left: 12px; padding-right: 12px; }
+    .pdp-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: var(--idr-dark);
+      color: var(--idr-ivory);
+      padding: 16px 28px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity 0.35s ease;
+    }
+    .pdp-cta:hover { opacity: 0.88; color: var(--idr-ivory); }
+    .pdp-wish {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--idr-charcoal-08);
+      background: transparent;
+      color: var(--idr-charcoal);
+      padding: 15px 22px;
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: border-color 0.3s ease, background 0.3s ease;
+    }
+    .pdp-wish:hover { border-color: var(--idr-charcoal); }
+    .pdp-wish.is-on {
+      background: var(--idr-dark);
+      border-color: var(--idr-dark);
+      color: var(--idr-ivory);
+    }
+    .pdp-secondary {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px 22px;
+      margin-top: 14px;
+      padding-top: 18px;
+      border-top: 1px solid var(--idr-charcoal-08);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .pdp-secondary a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--idr-taupe);
+      border-bottom: 1px solid transparent;
+      padding-bottom: 2px;
+    }
+    .pdp-secondary a svg {
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      stroke-width: 1.4;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.85;
+    }
+    .pdp-secondary a:hover {
+      color: var(--idr-charcoal);
+      border-bottom-color: var(--idr-charcoal);
+      opacity: 1;
+    }
+    .pdp-sizes {
+      margin: 0 0 32px;
+    }
+    .pdp-sizes-label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--idr-taupe);
+      margin: 0 0 12px;
+    }
+    .pdp-size-row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      width: 100%;
+    }
+    .pdp-size-opt {
+      flex: 1 1 0;
+      min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--idr-charcoal-08);
+      background: transparent;
+      color: var(--idr-charcoal);
+      padding: 10px 8px;
+      font: inherit;
+      font-size: 12px;
+      line-height: 1.35;
+      text-align: center;
+      white-space: normal;
+      cursor: pointer;
+      transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
+    }
+    .pdp-size-opt:hover { border-color: var(--idr-charcoal); }
+    .pdp-size-opt.is-on {
+      background: var(--idr-dark);
+      border-color: var(--idr-dark);
+      color: var(--idr-ivory);
+    }
+    .pdp-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--idr-taupe);
+      border-bottom: 1px solid transparent;
+      padding-bottom: 3px;
+    }
+    .pdp-back svg {
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      stroke-width: 1.4;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.85;
+    }
+    .pdp-back:hover {
+      color: var(--idr-charcoal);
+      border-bottom-color: var(--idr-charcoal);
+    }
+
+    /* Newsletter */
+    .nl-popup {
+      position: fixed;
+      right: 28px;
+      bottom: 28px;
+      width: min(360px, calc(100vw - 32px));
+      background: var(--idr-stone);
+      color: var(--idr-charcoal);
+      z-index: 200;
+      border: 1px solid var(--idr-charcoal-08);
+      box-shadow: 0 18px 48px rgba(37, 37, 34, 0.16);
+      opacity: 0;
+      transform: translate3d(0, 20px, 0);
+      pointer-events: none;
+      transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .nl-popup.is-open { opacity: 1; transform: none; pointer-events: auto; }
+    .nl-popup-inner { padding: 32px 28px 28px; position: relative; }
+    .nl-close {
+      position: absolute; top: 12px; right: 12px; border: none; background: transparent;
+      padding: 6px 8px; cursor: pointer; color: var(--idr-charcoal); opacity: 0.45;
+      font-size: 20px; line-height: 1; font-family: inherit;
+    }
+    .nl-close:hover { opacity: 0.85; }
+    .nl-eyebrow {
+      font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+      font-size: 16px; color: var(--idr-taupe); margin: 0 0 10px;
+    }
+    .nl-title {
+      font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 26px;
+      line-height: 1.15; letter-spacing: -0.015em; margin: 0 0 12px; max-width: 14ch;
+    }
+    .nl-body { font-size: 13px; line-height: 1.65; color: var(--idr-charcoal); opacity: 0.7; margin: 0 0 22px; }
+    .nl-form {
+      display: flex; align-items: end; gap: 0; border-bottom: 1px solid var(--idr-charcoal-08);
+    }
+    .nl-form input {
+      flex: 1; border: none; background: transparent; padding: 10px 0; font: inherit;
+      font-size: 14px; color: var(--idr-charcoal); outline: none; min-width: 0;
+    }
+    .nl-form button {
+      border: none; background: transparent; padding: 10px 0 10px 12px; font-size: 11px;
+      letter-spacing: 0.22em; text-transform: uppercase; cursor: pointer; color: var(--idr-charcoal); white-space: nowrap;
+    }
+    .nl-form button:hover { opacity: 0.7; }
+    .nl-thanks { display: none; font-size: 14px; line-height: 1.55; margin: 0; }
+    .nl-popup.is-done .nl-form,
+    .nl-popup.is-done .nl-body { display: none; }
+    .nl-popup.is-done .nl-thanks { display: block; }
+    @media (max-width: 640px) {
+      .nl-popup { right: 16px; bottom: 16px; left: 16px; width: auto; }
+    }
+    .pdp-ship {
+      margin-top: 20px;
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--idr-taupe);
+      max-width: 36ch;
+    }
+
+    /* On-page enquiry — same design language as Contact */
+    .pdp-enquire-block {
+      display: none !important;
+      padding: 88px var(--idr-inset) 100px;
+      border-top: 1px solid var(--idr-charcoal-08);
+      background: var(--idr-stone);
+      scroll-margin-top: 120px;
+      box-sizing: border-box;
+    }
+    .pdp-enquire-block.is-open {
+      display: block !important;
+    }
+    .pdp-enquire-block[hidden] { display: none !important; }
+    .pdp-enquire-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 64px 88px;
+      align-items: start;
+      width: 100%;
+    }
+    .pdp-enquire-intro {
+      display: flex;
+      flex-direction: column;
+      padding-top: 8px;
+    }
+    .pdp-enquire-intro .eyebrow {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 20px;
+      color: var(--idr-charcoal);
+      opacity: 0.55;
+      margin: 0 0 18px;
+    }
+    .pdp-enquire-intro h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: clamp(40px, 4.6vw, 58px);
+      line-height: 1.06;
+      letter-spacing: -0.02em;
+      margin: 0 0 22px;
+      color: var(--idr-charcoal);
+      max-width: 10ch;
+    }
+    .pdp-enquire-intro .intro-p {
+      font-size: 16px;
+      line-height: 1.75;
+      margin: 0 0 28px;
+      max-width: 34ch;
+      color: var(--idr-charcoal);
+      opacity: 0.72;
+    }
+    .pdp-enquire-piece {
+      margin: 0;
+      padding: 28px 0 0;
+      border-top: 1px solid var(--idr-charcoal-08);
+      max-width: 36ch;
+    }
+    .pdp-enquire-piece strong {
+      display: block;
+      font-weight: 500;
+      font-size: 15px;
+      color: var(--idr-charcoal);
+      margin: 0 0 6px;
+    }
+    .pdp-enquire-piece span {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--idr-charcoal);
+      opacity: 0.72;
+    }
+    .pdp-enquire-panel { padding: 8px 0 0; }
+    .pdp-enquire-block .contact-form { display: flex; flex-direction: column; gap: 26px; }
+    .pdp-enquire-block .contact-wish {
+      margin: 0 0 8px;
+      padding: 0 0 22px;
+      border-bottom: 1px solid var(--idr-charcoal-08);
+    }
+    .pdp-enquire-block .contact-wish[hidden] { display: none; }
+    .pdp-enquire-block .contact-wish-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--idr-taupe);
+      margin: 0 0 12px;
+    }
+    .pdp-enquire-block .contact-wish-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pdp-enquire-block .contact-wish-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      font-size: 14px;
+    }
+    .pdp-enquire-block .contact-wish-list .name { color: var(--idr-charcoal); font-weight: 500; }
+    .pdp-enquire-block .contact-wish-list .meta { color: var(--idr-taupe); font-size: 13px; text-align: right; }
+    .pdp-enquire-block .contact-wish-clear {
+      margin-top: 14px;
+      border: none;
+      background: transparent;
+      padding: 0;
+      font: inherit;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--idr-taupe);
+      cursor: pointer;
+      border-bottom: 1px solid transparent;
+    }
+    .pdp-enquire-block .contact-wish-clear:hover {
+      color: var(--idr-charcoal);
+      border-bottom-color: var(--idr-charcoal);
+    }
+    .pdp-enquire-block .contact-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .pdp-enquire-block .contact-field label,
+    .pdp-enquire-block .contact-field-label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      color: var(--idr-charcoal);
+      opacity: 0.5;
+    }
+    .pdp-enquire-block .contact-field input,
+    .pdp-enquire-block .contact-field textarea {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid var(--idr-charcoal-08);
+      background: transparent;
+      padding: 12px 0 14px;
+      font: inherit;
+      font-size: 15px;
+      color: var(--idr-charcoal);
+      outline: none;
+      border-radius: 0;
+      transition: border-color 0.3s ease;
+    }
+    .pdp-enquire-block .contact-field textarea { min-height: 140px; resize: vertical; }
+    .pdp-enquire-block .contact-field input:focus,
+    .pdp-enquire-block .contact-field textarea:focus { border-bottom-color: var(--idr-charcoal); }
+    .pdp-enquire-block .contact-field input::placeholder,
+    .pdp-enquire-block .contact-field textarea::placeholder {
+      color: var(--idr-taupe);
+      opacity: 0.7;
+    }
+    .pdp-enquire-block .contact-select { position: relative; }
+    .pdp-enquire-block .contact-select-trigger {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      border: none;
+      border-bottom: 1px solid var(--idr-charcoal-08);
+      background: transparent;
+      padding: 12px 0 14px;
+      font: inherit;
+      font-size: 15px;
+      text-align: left;
+      cursor: pointer;
+      color: var(--idr-charcoal);
+      transition: border-color 0.3s ease;
+    }
+    .pdp-enquire-block .contact-select.is-open .contact-select-trigger { border-bottom-color: var(--idr-charcoal); }
+    .pdp-enquire-block .contact-select-chevron {
+      width: 12px; height: 8px; stroke: var(--idr-taupe); fill: none; stroke-width: 1.2;
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+    .pdp-enquire-block .contact-select.is-open .contact-select-chevron { transform: rotate(180deg); }
+    .pdp-enquire-block .contact-select-menu {
+      position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 20;
+      margin: 0; padding: 8px 0; list-style: none;
+      background: var(--idr-stone);
+      border: 1px solid var(--idr-charcoal-08);
+      box-shadow: 0 18px 40px rgba(37, 37, 34, 0.08);
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    }
+    .pdp-enquire-block .contact-select.is-open .contact-select-menu {
+      opacity: 1; visibility: visible; pointer-events: auto; transform: none;
+    }
+    .pdp-enquire-block .contact-select-option {
+      width: 100%; border: none; background: transparent;
+      padding: 12px 16px; text-align: left; font: inherit; font-size: 14px;
+      cursor: pointer; color: var(--idr-charcoal);
+    }
+    .pdp-enquire-block .contact-select-option:hover,
+    .pdp-enquire-block .contact-select-option.is-active { background: var(--idr-ivory); }
+    .pdp-enquire-block .contact-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 18px;
+      margin-top: 8px;
+    }
+    .pdp-enquire-block .contact-submit {
+      border: none;
+      background: var(--idr-dark);
+      color: var(--idr-ivory);
+      padding: 17px 32px;
+      font: inherit;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.35s ease;
+    }
+    .pdp-enquire-block .contact-submit:hover { opacity: 0.85; }
+    .pdp-enquire-block .contact-note {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--idr-taupe);
+      margin: 0;
+    }
+    .pdp-enquire-block .contact-thanks {
+      display: none;
+      padding: 8px 0;
+    }
+    .pdp-enquire-block .contact-thanks.is-visible { display: block; }
+    .pdp-enquire-block .contact-form[hidden] { display: none; }
+    .pdp-enquire-block .contact-thanks h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: clamp(28px, 3vw, 36px);
+      line-height: 1.15;
+      margin: 0 0 14px;
+      letter-spacing: -0.015em;
+    }
+    .pdp-enquire-block .contact-thanks p {
+      font-size: 15px;
+      line-height: 1.7;
+      margin: 0;
+      opacity: 0.7;
+    }
+    .pdp-enquire-block.is-flash {
+      animation: pdpEnquireFlash 1.1s ease;
+    }
+    @keyframes pdpEnquireFlash {
+      0%, 100% { background: var(--idr-stone); }
+      35% { background: var(--idr-ivory); }
+    }
+
+    .pdp-more {
+      padding: 0 var(--idr-inset) 100px;
+    }
+    .pdp-more-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 24px;
+      margin-bottom: 36px;
+    }
+    .pdp-more-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(26px, 3vw, 34px);
+      font-weight: 600;
+      margin: 0;
+      color: var(--idr-charcoal);
+    }
+    .pdp-more-link {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--idr-taupe);
+    }
+    .pdp-more-link:hover { color: var(--idr-charcoal); }
+    .pdp-more-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 48px 28px;
+    }
+    .product-tile {
+      display: block;
+      color: inherit;
+      min-width: 0;
+    }
+    .product-media {
+      aspect-ratio: 2 / 3;
+      overflow: hidden;
+      background: transparent;
+      margin-bottom: 22px;
+    }
+    .product-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      transform: none;
+      transition: filter 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .pdp-more .product-tile:hover .product-media img {
+        filter: brightness(1.12);
+      }
+    }
+    .product-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 600;
+      margin: 0 0 8px;
+      color: var(--idr-charcoal);
+      letter-spacing: -0.01em;
+    }
+    .product-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--idr-taupe);
+    }
+
+    @media (max-width: 960px) {
+      .pdp {
+        grid-template-columns: 1fr;
+        gap: 36px;
+        padding-bottom: 72px;
+      }
+      .pdp-info { max-width: none; padding-top: 0; }
+      .pdp-enquire-grid { grid-template-columns: 1fr; gap: 36px; }
+      .pdp-enquire-block.is-open { padding: 56px var(--idr-inset) 72px; }
+      .pdp-more-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .pdp-more-grid { grid-template-columns: 1fr; }
+      .pdp-enquire-block .contact-row { grid-template-columns: 1fr; gap: 22px; }
+      .pdp-enquire-block .contact-submit { width: 100%; text-align: center; }
+    }
+
+    .shop-footer {
+      background: var(--idr-dark);
+      color: var(--idr-ivory);
+      padding: 90px var(--idr-inset);
+    }
+    .shop-footer-top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 48px;
+      align-items: end;
+      margin-bottom: 72px;
+      padding-bottom: 56px;
+      border-bottom: 1px solid var(--idr-ivory-12);
+    }
+    .shop-footer-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 64px;
+      margin-bottom: 100px;
+    }
+    .shop-footer-bottom {
+      border-top: 1px solid var(--idr-ivory-10);
+      padding-top: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--idr-ivory-65);
+    }
+
+    /* Search overlay — shared with Home */
+    .search-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: flex;
+      flex-direction: column;
+      background: var(--idr-stone);
+      color: var(--idr-charcoal);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.45s;
+    }
+    .search-overlay.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .search-overlay-top {
+      display: flex;
+      justify-content: flex-end;
+      padding: 28px var(--idr-inset);
+    }
+    .search-close {
+      border: none;
+      background: transparent;
+      padding: 8px 0;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--idr-charcoal);
+      cursor: pointer;
+    }
+    .search-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8vh var(--idr-inset) 64px;
+      max-width: 920px;
+      width: 100%;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .search-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 19px;
+      color: var(--idr-taupe);
+      margin: 0 0 20px;
+    }
+    .search-field {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid var(--idr-charcoal);
+      background: transparent;
+      padding: 12px 0 18px;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 500;
+      font-size: clamp(28px, 4vw, 44px);
+      letter-spacing: -0.015em;
+      color: var(--idr-charcoal);
+      outline: none;
+      border-radius: 0;
+    }
+    .search-field::placeholder { color: var(--idr-taupe); opacity: 0.7; }
+    .search-hint {
+      margin: 16px 0 0;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--idr-taupe);
+    }
+    .search-results {
+      list-style: none;
+      margin: 48px 0 0;
+      padding: 0;
+      overflow-y: auto;
+      max-height: min(52vh, 480px);
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .search-results::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    .search-result {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      gap: 20px;
+      align-items: center;
+      padding: 16px 0;
+      border-top: 1px solid var(--idr-charcoal-08);
+      color: inherit;
+    }
+    .search-result:last-child { border-bottom: 1px solid var(--idr-charcoal-08); }
+    .search-result:hover { opacity: 0.7; }
+    .search-result-thumb {
+      width: 72px; height: 90px; overflow: hidden; background: var(--idr-ivory);
+    }
+    .search-result-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .search-result-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 22px;
+      margin: 0 0 4px;
+    }
+    .search-result-meta { font-size: 13px; color: var(--idr-taupe); margin: 0; }
+    .search-result-price { font-size: 13px; color: var(--idr-taupe); white-space: nowrap; }
+    .search-empty {
+      margin-top: 48px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--idr-taupe);
+      display: none;
+    }
+    .search-overlay.is-empty .search-empty { display: block; }
+    .search-overlay.is-empty .search-results { display: none; }
+    html.search-open { overflow: hidden; }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal {
+        opacity: 0;
+        transform: translate3d(0, 28px, 0);
+        transition:
+          opacity 1.05s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 1.15s cubic-bezier(0.22, 1, 0.36, 1);
+        transition-delay: var(--r, 0ms);
+      }
+      .reveal.is-in { opacity: 1; transform: none; }
+    }
+
+    @media (max-width: 960px) {
+      :root { --idr-inset: 32px; }
+      .shop-header { padding: 20px 32px; }
+      .shop-nav { gap: 22px; font-size: 11px; letter-spacing: 0.2em; }
+      .shop-utils { gap: 16px; font-size: 11px; }
+      .shop-grid { grid-template-columns: repeat(2, 1fr); gap: 40px 20px; }
+      .pdp { padding: 0 32px 72px !important; gap: 32px !important; }
+      .pdp-crumb { padding: 18px 32px 10px; }
+      .pdp-enquire-block { padding: 48px 32px 64px; scroll-margin-top: 100px; }
+      .pdp-more { padding: 0 32px 80px; }
+      .shop-footer { padding: 70px 32px; }
+      .shop-footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+      .shop-footer-top { grid-template-columns: 1fr; gap: 24px; }
+    }
+    @media (max-width: 640px) {
+      :root { --idr-inset: 20px; }
+      .shop-topbar { font-size: 9px; letter-spacing: 0.24em; padding: 0 16px; height: 32px; text-align: center; position: static; }
+      .shop-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        top: 0;
+      }
+      .shop-nav { display: none; }
+      .shop-utils > *:not(.mm-toggle) { display: none; }
+      .idr-mark { width: 100px; height: 38px; }
+      .pdp { padding: 0 20px 48px !important; gap: 20px !important; }
+      .pdp-enquire-block { padding: 40px 20px 56px; scroll-margin-top: 88px; }
+      .pdp-crumb {
+        padding: 12px 20px 8px;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+      }
+      .pdp-crumb-sep { margin: 0 8px; }
+      .pdp-gallery {
+        margin-left: calc(-1 * var(--idr-inset));
+        margin-right: calc(-1 * var(--idr-inset));
+        width: calc(100% + 2 * var(--idr-inset));
+        gap: 10px;
+      }
+      .pdp-gallery-thumbs { padding: 0 var(--idr-inset); }
+      .pdp-media { aspect-ratio: 2 / 3; }
+      .pdp-zoom-hint {
+        opacity: 1;
+        left: var(--idr-inset);
+        bottom: var(--idr-inset);
+      }
+      .pdp-name { font-size: clamp(28px, 8vw, 36px); }
+      .pdp-price { font-size: 13px; }
+      .pdp-specs { grid-template-columns: 1fr; gap: 10px; }
+      .pdp-cta-row { flex-direction: column; align-items: stretch; }
+      .pdp-cta-row--pair { grid-template-columns: 1fr; }
+      /* Saved pieces in the on-page enquiry: stack name over origin/size. */
+      .pdp-enquire-block .contact-wish-list { gap: 14px; }
+      .pdp-enquire-block .contact-wish-list li { flex-direction: column; align-items: flex-start; gap: 2px; }
+      .pdp-enquire-block .contact-wish-list .meta { text-align: left; }
+      .pdp-enquire-block .contact-wish-clear { margin-top: 20px; }
+      .pdp-size-row { flex-wrap: wrap; }
+      .pdp-size-opt { flex: 1 1 100%; }
+      .pdp-cta { width: 100%; text-align: center; padding: 16px 20px; }
+      .pdp-wish { width: 100%; text-align: center; padding: 16px 20px; }
+      .pdp-more { padding: 0 20px 56px; }
+      .pdp-more-head { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 24px; }
+      .pdp-more-grid { grid-template-columns: 1fr; gap: 32px; }
+      .shop-grid { grid-template-columns: 1fr; gap: 28px; }
+      .shop-footer { padding: 56px 20px 40px; }
+      .shop-footer-top { grid-template-columns: 1fr; gap: 24px; margin-bottom: 40px; padding-bottom: 32px; }
+      .shop-footer-top form {
+        min-width: 0 !important;
+        width: 100%;
+        max-width: none !important;
+      }
+      .shop-footer-grid { grid-template-columns: 1fr; gap: 32px; margin-bottom: 32px; }
+      .shop-footer-bottom { flex-direction: column; align-items: flex-start; gap: 16px; font-size: 10px; }
+      .shop-footer-bottom > div:last-child { flex-wrap: wrap; gap: 14px 20px; }
+      /* Legal links sit on their own lines under a hairline, apart from lang/currency/social. */
+      .shop-footer-bottom a[href$="Privacy.dc.html"] { flex: 0 0 100%; margin-top: 6px; padding-top: 20px; border-top: 1px solid var(--idr-ivory-10); }
+      .shop-footer-bottom a[href$="Terms.dc.html"] { flex: 0 0 100%; }
+      /* Lang and currency are different controls — each gets its own row. */
+      .shop-footer-bottom > div:last-child .lang-toggle { flex: 0 0 100%; justify-content: flex-start; }
+      .shop-footer-bottom > div:last-child .lang-toggle + a { flex: 0 0 100%; padding: 2px 0 6px; }
+      /* Social marks get their own row after the switchers. */
+      .shop-footer-bottom > div:last-child::after { content: ""; flex: 0 0 100%; order: 2; }
+      .shop-footer-bottom .social-link { order: 3; }
+      .shop-footer-bottom a[href$="Privacy.dc.html"], .shop-footer-bottom a[href$="Terms.dc.html"] { order: 4; }
+      /* The row carries an inline gap: 28px, which doubled around the line break; tighten rows only. */
+      .shop-footer-bottom > div:last-child { row-gap: 14px !important; }
+      .shop-footer .idr-mark { width: min(201px, 70vw) !important; height: auto !important; aspect-ratio: 201 / 67; }
+      .search-result { grid-template-columns: 56px 1fr; }
+      .search-result-price { display: none; }
+    }
+
+    /* Mobile menu (burger + slide-in panel) */
+    .mm-toggle { display: none; }
+    .mm-panel { display: none; }
+    @media (max-width: 640px) {
+      .mm-toggle {
+        display: inline-flex; flex-direction: column; justify-content: center; align-items: center;
+        gap: 4.5px; width: 32px; height: 32px; border: none; background: transparent; padding: 0; cursor: pointer;
+        color: var(--idr-charcoal);
+        position: relative; z-index: 2;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-appearance: none; appearance: none;
+        outline: none;
+      }
+      .mm-toggle:focus-visible { outline: 1px dashed var(--idr-charcoal); outline-offset: 4px; }
+      .mm-toggle span {
+        display: block; width: 20px; height: 1.5px; background: currentColor;
+        transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease;
+      }
+      .mm-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+      .mm-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+      .mm-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+      .mm-panel {
+        display: flex; flex-direction: column; justify-content: space-between;
+        position: fixed; inset: 0; z-index: 55;
+        background: var(--idr-stone); color: var(--idr-charcoal);
+        padding: 88px 28px 40px;
+        opacity: 0; visibility: hidden; pointer-events: none;
+        transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.4s;
+      }
+      .mm-panel.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+      .mm-nav { display: flex; flex-direction: column; gap: 22px; }
+      .mm-nav a {
+        font-family: 'Cormorant Garamond', serif; font-weight: 500;
+        font-size: 30px; letter-spacing: -0.01em; line-height: 1.1; color: var(--idr-charcoal);
+      }
+      .mm-utils { display: flex; padding-top: 32px; border-top: 1px solid var(--idr-charcoal-08); }
+      .mm-utils .lang-toggle {
+        color: var(--idr-charcoal); font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase;
+      }
+      html.mm-open, html.mm-open body { overflow: hidden; }
+      .mm-close {
+        position: absolute; top: 18px; right: 16px;
+        width: 44px; height: 44px; border: none; background: transparent; padding: 0;
+        cursor: pointer; color: var(--idr-charcoal);
+        display: inline-flex; align-items: center; justify-content: center;
+        z-index: 2;
+      }
+      .mm-close svg { display: block; width: 22px; height: 22px; stroke: currentColor; stroke-width: 1.6; fill: none; }
+      .mm-close:hover { opacity: 0.7; }
+    }
+  
+    /* Info disclosure in the top-right utilities. CSS-only so every page
+       behaves the same without per-page script. */
+    .info-menu { position: relative; display: inline-flex; }
+    .info-menu-trigger {
+      border: none;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      font: inherit;
+      letter-spacing: inherit;
+      text-transform: inherit;
+      color: inherit;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .info-menu-panel {
+      position: absolute;
+      top: calc(100% + 14px);
+      right: 0;
+      z-index: 60;
+      min-width: 208px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 18px 20px;
+      background: var(--idr-stone);
+      border: 1px solid var(--idr-charcoal-08);
+      box-shadow: 0 18px 40px rgba(37, 37, 34, 0.09);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s;
+    }
+    .info-menu:hover .info-menu-panel,
+    .info-menu:focus-within .info-menu-panel {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+    .info-menu-panel a {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--idr-taupe-ink);
+      white-space: nowrap;
+    }
+    .info-menu-panel a:hover { color: var(--idr-charcoal); }
+
+    /* Footer social marks — icon replaces the word, label kept for screen readers. */
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+    }
+    .social-link svg { width: 24px; height: 24px; display: block; }
+    /* Icons sit inside the footer row's 28px gap; pull the pair together. */
+    .social-link + .social-link { margin-left: -16px; }
+    .social-link:hover { opacity: 0.7; }
+
+    @media (max-width: 860px) {
+      .info-menu { display: none; }
+    }
+
+    /* Header "Saved" link. The count is written by idraren.js and hidden at
+       zero, so the header does not carry a stray 0. */
+    /* Saved: a bookmark mark with a count badge, sized to sit on the same
+       baseline as the search and language icons beside it. */
+    /* Saved: an outline bookmark drawn to match the search and globe icons
+       beside it (same size, same 1.4 stroke). It never fills: a solid black
+       mark read heavy next to the outline icons. The count sits in a small
+       badge on the corner, ringed in the header colour so it separates from
+       the stroke, and is hidden at zero. */
+    .saved-link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      color: inherit;
+    }
+    .saved-icon {
+      width: 19px;
+      height: 19px;
+      display: block;
+      transition: opacity 0.3s ease;
+    }
+    .saved-link:hover .saved-icon { opacity: 0.65; }
+    .saved-count {
+      position: absolute;
+      top: -5px;
+      right: -9px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      box-sizing: border-box;
+      border-radius: 999px;
+      background: var(--idr-charcoal);
+      color: var(--idr-stone);
+      box-shadow: 0 0 0 2px var(--idr-stone);
+      font-family: 'Manrope', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0;
+      line-height: 16px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      pointer-events: none;
+    }
+    .saved-count[hidden],
+    .saved-count:empty { display: none; }
+    /* On dark grounds the badge inverts and its ring follows the ground. */
+    .on-dark .saved-count,
+    #hero .saved-count {
+      background: var(--idr-ivory);
+      color: var(--idr-dark);
+      box-shadow: 0 0 0 2px var(--idr-dark);
+    }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; background: var(--idr-stone);">
+  <header class="shop-header">
+    <a href="./Home.dc.html" aria-label="Idraren, home"><span class="idr-wordmark">IDRAREN</span></a>
+    <nav class="shop-nav" aria-label="Primary">
+      <div class="nav-item" id="nav-shop">
+        <a href="./Shop.dc.html" aria-haspopup="true" aria-expanded="false" id="nav-shop-trigger" data-i18n="nav.shop">Shop</a>
+        <div class="nav-panel" role="menu" aria-label="Shop categories">
+          <div class="nav-panel-inner">
+            <div class="nav-panel-col">
+              <div class="nav-panel-label" data-i18n="nav.shopLabel">Shop</div>
+              <a href="./Shop.dc.html?cat=new" data-cat="new" role="menuitem" data-i18n="nav.newArrivals">New Arrivals</a>
+              <a href="./Shop.dc.html?cat=bestsellers" data-cat="bestsellers" role="menuitem" data-i18n="nav.bestSellers">Best Sellers</a>
+              <a href="./Shop.dc.html?cat=instock" data-cat="instock" role="menuitem" data-i18n="nav.inStock">In stock</a>
+                            <a href="./Shop.dc.html?cat=customized" data-cat="customized" role="menuitem" data-i18n="nav.sale">Customized</a>
+              <a href="./Shop.dc.html?cat=collections" data-cat="collections" role="menuitem" data-i18n="nav.collections">Collections</a>
+              <a href="./Shop.dc.html?cat=samples" data-cat="samples" role="menuitem" data-i18n="nav.samples">Samples</a>
+            </div>
+            <div class="nav-panel-col">
+              <div class="nav-panel-label" data-i18n="nav.collections">Collections</div>
+              <a href="./Shop.dc.html?cat=collections&amp;col=atlas" data-cat="collections" data-col="atlas" role="menuitem" data-i18n="col.atlas">Atlas</a>
+              <a href="./Shop.dc.html?cat=collections&amp;col=rabat" data-cat="collections" data-col="rabat" role="menuitem" data-i18n="col.rabat">Rabat</a>
+              <a href="./Shop.dc.html?cat=collections&amp;col=anfa" data-cat="collections" data-col="anfa" role="menuitem" data-i18n="col.anfa">Anfa</a>
+              <a href="./Shop.dc.html?cat=collections&amp;col=sahara" data-cat="collections" data-col="sahara" role="menuitem" data-i18n="col.sahara">Sahara</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a href="./Story.dc.html" data-i18n="nav.story">About</a>
+      <a href="./Contact.dc.html" data-i18n="nav.contact">Contact</a>
+      <a href="./Trade.dc.html" data-i18n="nav.collaborate">Collaborate</a>
+    </nav>
+    <div class="shop-utils">
+      <button type="button" class="search-open-btn" id="search-open" aria-label="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg></button>
+      <button type="button" class="lang-toggle" id="lang-toggle" aria-label="Language"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg><span class="lang-opt is-on lang-code" data-lang="en">EN</span><span class="lang-opt lang-code" data-lang="fr">FR</span></button>
+      <a class="saved-link" data-saved-link href="./Saved.dc.html" aria-label="Saved" title="Saved"><svg class="saved-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.75h11a1 1 0 0 1 1 1v15.1a.4.4 0 0 1-.62.33L12 16.4l-5.88 3.78a.4.4 0 0 1-.62-.33V4.75a1 1 0 0 1 1-1Z"/></svg><span class="saved-count" data-saved-count hidden></span></a>
+      <div class="info-menu">
+        <button type="button" class="info-menu-trigger" aria-haspopup="true" data-i18n="nav.info">Info</button>
+        <div class="info-menu-panel" role="menu">
+          <a href="./Shipping.dc.html" role="menuitem" data-i18n="footer.shipping">Shipping &amp; VAT</a>
+          <a href="./Cancellations.dc.html" role="menuitem" data-i18n="footer.cancel">Cancellations</a>
+          <a href="./Care.dc.html" role="menuitem" data-i18n="footer.care">Care</a>
+          <a href="./Size-guide.dc.html" role="menuitem" data-i18n="footer.size">Size</a>
+        </div>
+      </div>
+      <a href="./Contact.dc.html" data-i18n="nav.enquiry">Enquiry</a>
+      <button type="button" class="mm-toggle" id="mm-toggle" aria-label="Menu" aria-expanded="false" aria-controls="mm-panel">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <div class="mm-panel" id="mm-panel" aria-hidden="true">
+    <button type="button" class="mm-close" id="mm-close" aria-label="Close menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+    </button>
+    <nav class="mm-nav" aria-label="Mobile primary">
+      <a href="./Shop.dc.html" data-i18n="nav.shop">Shop</a>
+      <a href="./Story.dc.html" data-i18n="nav.story">About</a>
+      <a href="./Contact.dc.html" data-i18n="nav.contact">Contact</a>
+      <a href="./Trade.dc.html" data-i18n="nav.collaborate">Collaborate</a>
+      <a href="./Contact.dc.html" data-i18n="nav.enquiry">Enquiry</a>
+    </nav>
+    <div class="mm-info">
+      <p class="mm-label" data-i18n="nav.info">Info</p>
+      <a href="./Shipping.dc.html" data-i18n="footer.shipping">Shipping &amp; VAT</a>
+      <a href="./Cancellations.dc.html" data-i18n="footer.cancel">Cancellations</a>
+      <a href="./Care.dc.html" data-i18n="footer.care">Care</a>
+      <a href="./Size-guide.dc.html" data-i18n="footer.size">Size</a>
+    </div>
+    <div class="mm-utils">
+      <button type="button" class="mm-icon" data-mm-search aria-label="Search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg></button>
+      <a class="mm-icon saved-link" data-saved-link href="./Saved.dc.html" aria-label="Saved"><svg class="saved-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 3.75h11a1 1 0 0 1 1 1v15.1a.4.4 0 0 1-.62.33L12 16.4l-5.88 3.78a.4.4 0 0 1-.62-.33V4.75a1 1 0 0 1 1-1Z"/></svg><span class="saved-count" data-saved-count hidden></span></a>
+      <button type="button" class="lang-toggle" aria-label="Language">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+        <span class="lang-opt is-on lang-code" data-lang="en">EN</span><span class="lang-opt lang-code" data-lang="fr">FR</span>
+      </button>
+    </div>
+  </div>
+
+  <nav class="pdp-crumb reveal lang-copy" aria-label="Breadcrumb">
+    <a href="./Shop.dc.html" data-i18n="nav.shop">Shop</a>
+    <span class="pdp-crumb-sep" aria-hidden="true">/</span>
+    <span id="pdp-crumb-name">Rug 45</span>
+  </nav>
+
+  <section class="pdp lang-copy">
+    <div class="pdp-gallery reveal-media reveal">
+      <button type="button" class="pdp-media" id="pdp-media" aria-label="Zoom image">
+        <img id="pdp-image" src="./images/rugs/rug-45.png" alt="Rug 45">
+      </button>
+      <div class="pdp-gallery-thumbs" id="pdp-gallery-thumbs" role="tablist" aria-label="Product images"></div>
+    </div>
+    <div class="pdp-info reveal" style="--r: 80ms;">
+      <p class="pdp-kicker" id="pdp-kicker">Anfa · Handwoven</p>
+      <h1 class="pdp-name" id="pdp-name">Rug 45</h1>
+      <p class="pdp-price" id="pdp-price">from $2, 480</p>
+      <p class="pdp-note" id="pdp-note">150 × 240 cm (5 × 8 ft) · Handwoven wool</p>
+      <p class="pdp-body" id="pdp-body">Handwoven in Morocco for the Anfa collection. One of a kind; enquire to reserve.</p>
+      <ul class="pdp-specs" id="pdp-specs">
+        <li><span class="label" data-i18n="pdp.origin">Origin</span><span class="value" id="pdp-origin">High Atlas</span></li>
+        <li><span class="label" data-i18n="pdp.size">Size</span><span class="value" id="pdp-size">150 × 240 cm (5 × 8 ft)</span></li>
+        <li><span class="label" data-i18n="pdp.fibre">Fibre</span><span class="value" id="pdp-fibre">Handwoven wool</span></li>
+      </ul>
+      <div class="pdp-sizes" id="pdp-sizes" hidden>
+        <p class="pdp-sizes-label" data-i18n="pdp.sizeInterest">Interested size</p>
+        <div class="pdp-size-row" id="pdp-size-row" role="group" aria-label="Size interest"></div>
+      </div>
+      <div class="pdp-actions">
+        <div class="pdp-cta-row">
+          <a class="pdp-cta" id="pdp-enquire" href="#" data-i18n="pdp.enquire">Enquire About This Piece</a>
+          <button type="button" class="pdp-wish" id="pdp-wish" data-i18n="pdp.wish">Save</button>
+        </div>
+        <div class="pdp-cta-row pdp-cta-row--pair">
+          <a class="pdp-wish" id="pdp-quote" href="#" data-i18n="pdp.quote">Request a Quote</a>
+          <a class="pdp-wish" id="pdp-swatch" href="#" data-i18n="pdp.swatch">Request a Sample</a>
+        </div>
+        <div class="pdp-secondary">
+          <a href="./Size-guide.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v10H4z"/><path d="M8 7v3M12 7v2M16 7v3M8 17v-3M12 17v-2M16 17v-3"/></svg><span data-i18n="pdp.sizeGuide">Size guide</span></a>
+          <a class="pdp-back" href="./Shop.dc.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 L8 12 L15 19"/></svg><span data-i18n="pdp.back">Back to shop</span></a>
+        </div>
+      </div>
+      <p class="pdp-ship" data-i18n="pdp.ship">Shipping fees are set separately from the rug price. We confirm timing once your enquiry is received.</p>
+    </div>
+  </section>
+
+  <section class="pdp-enquire-block lang-copy" id="pdp-enquire-block" aria-label="Enquire" hidden aria-hidden="true">
+    <div class="pdp-enquire-grid">
+      <div class="pdp-enquire-intro reveal">
+        <div class="eyebrow" data-i18n="pdp.formEyebrow">Enquiry</div>
+        <h2 data-i18n="pdp.formTitle">Write about this piece.</h2>
+        <p class="intro-p" data-i18n="pdp.formBody">Tell us the size you have in mind. We reply directly.</p>
+        <p class="pdp-enquire-piece">
+          <strong id="pdp-enquire-piece-name">Rug 45</strong>
+          <span id="pdp-enquire-piece-meta">150 × 240 cm (5 × 8 ft)</span>
+        </p>
+      </div>
+      <div class="pdp-enquire-panel reveal" style="--r: 80ms;">
+        <div class="contact-wish" id="pdp-enquire-wish" hidden>
+          <p class="contact-wish-label" data-i18n="contact.wishLabel">Saved pieces</p>
+          <ul class="contact-wish-list" id="pdp-enquire-wish-list"></ul>
+          <button type="button" class="contact-wish-clear" id="pdp-enquire-wish-clear" data-i18n="contact.wishClear">Clear saved</button>
+        </div>
+        <form class="contact-form" id="pdp-enquire-form" novalidate>
+          <div class="contact-row">
+            <div class="contact-field">
+              <label for="pdp-enq-name" data-i18n="contact.name">Name</label>
+              <input id="pdp-enq-name" name="name" type="text" required autocomplete="name" data-i18n-placeholder="contact.namePh" placeholder="Your name">
+            </div>
+            <div class="contact-field">
+              <label for="pdp-enq-email" data-i18n="contact.email">Email</label>
+              <input id="pdp-enq-email" name="email" type="email" required autocomplete="email" data-i18n-placeholder="contact.emailPh" placeholder="you@studio.com">
+            </div>
+          </div>
+          <div class="contact-field">
+            <span class="contact-field-label" id="pdp-enq-interest-label" data-i18n="contact.interest">I am enquiring as</span>
+            <div class="contact-select" id="pdp-enq-select">
+              <input type="hidden" name="interest" id="pdp-enq-interest" value="private" required>
+              <button type="button" class="contact-select-trigger" id="pdp-enq-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="pdp-enq-interest-label">
+                <span id="pdp-enq-select-value">Private client</span>
+                <svg class="contact-select-chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1l5 5 5-5"/></svg>
+              </button>
+              <ul class="contact-select-menu" id="pdp-enq-select-menu" role="listbox" hidden>
+                <li role="none"><button type="button" class="contact-select-option is-active" role="option" data-value="private" data-i18n="contact.optPrivate" aria-selected="true">Private client</button></li>
+                <li role="none"><button type="button" class="contact-select-option" role="option" data-value="trade" data-i18n="contact.optTrade" aria-selected="false">Trade / designer / hotel</button></li>
+                <li role="none"><button type="button" class="contact-select-option" role="option" data-value="swatch" data-i18n="contact.optSwatch" aria-selected="false">Swatch / sample</button></li>
+                <li role="none"><button type="button" class="contact-select-option" role="option" data-value="quote" data-i18n="contact.optQuote" aria-selected="false">Custom quote</button></li>
+                <li role="none"><button type="button" class="contact-select-option" role="option" data-value="other" data-i18n="contact.optOther" aria-selected="false">Something else</button></li>
+              </ul>
+            </div>
+          </div>
+          <div class="contact-field">
+            <label for="pdp-enq-message" data-i18n="contact.message">Message</label>
+            <textarea id="pdp-enq-message" name="message" required data-i18n-placeholder="contact.messagePh" placeholder="Tell us about the piece, size, or project…"></textarea>
+          </div>
+          <div class="contact-actions">
+            <button type="submit" class="contact-submit" data-i18n="contact.send">Send enquiry</button>
+            <p class="contact-note" data-i18n="contact.note">No cart, every piece begins with a conversation.</p>
+          </div>
+        </form>
+        <div class="contact-thanks" id="pdp-enquire-thanks" aria-live="polite" hidden>
+          <h3 data-i18n="contact.thanksTitle">Message received.</h3>
+          <p data-i18n="contact.thanksBody">Thank you, we'll reply as soon as we can.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pdp-more lang-copy">
+    <div class="pdp-more-head reveal">
+      <h2 class="pdp-more-title" data-i18n="pdp.more">More from the loom</h2>
+      <a class="pdp-more-link" href="./Shop.dc.html" data-i18n="nav.shop">Shop</a>
+    </div>
+    <div class="pdp-more-grid" id="pdp-more-grid">
+      {{ moreTiles }}
+    </div>
+  </section>
+
+  <footer class="shop-footer">
+    <div class="shop-footer-top reveal lang-copy">
+      <div>
+        <div style="font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: clamp(24px, 2.4vw, 32px); line-height: 1.15; color: var(--idr-ivory); margin: 0 0 10px; max-width: 22ch;" data-i18n="footer.letters">Letters from the Atlas.</div>
+        <p style="font-size: 13px; line-height: 1.7; color: var(--idr-ivory-70); margin: 0; max-width: 42ch;" data-i18n="footer.lettersBody">New arrivals, artisan stories, and styling notes. Once a month, no more.</p>
+      </div>
+      <form style="display: flex; align-items: end; gap: 0; border-bottom: 1px solid var(--idr-ivory-40); min-width: 280px; max-width: 460px;">
+        <input type="email" data-i18n-placeholder="footer.email" placeholder="Your email address" style="flex: 1; border: none; background: transparent; padding: 10px 0; font-size: 14px; font-family: inherit; color: var(--idr-ivory); outline: none;">
+        <button type="submit" style="border: none; background: transparent; padding: 10px 4px; font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase; cursor: pointer; color: var(--idr-ivory);" data-i18n="footer.subscribe">Subscribe</button>
+      </form>
+    </div>
+    <div class="shop-footer-grid reveal lang-copy" style="--r: 80ms;">
+      <div>
+        <div style="margin-bottom: 24px; line-height: 0;"><span class="idr-mark is-light" style="width: 201px; height: 67px;"><img src="./images/logo-idraren.png" alt="Idraren"></span></div>
+        <p style="font-size: 13px; line-height: 1.75; color: var(--idr-ivory-70); max-width: 32ch; margin: 0;" data-i18n="footer.tagline">Handwoven in the Atlas. shipped worldwide.</p>
+      </div>
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; margin-bottom: 24px; color: var(--idr-ivory-65);" data-i18n="nav.shop">Shop</div>
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: var(--idr-ivory-92);">
+          <a href="./Shop.dc.html?cat=new" data-i18n="nav.newArrivals">New Arrivals</a>
+          <a href="./Shop.dc.html?cat=bestsellers" data-i18n="nav.bestSellers">Best Sellers</a>
+          <a href="./Shop.dc.html?cat=instock" data-i18n="nav.inStock">In stock</a>
+          <a href="./Shop.dc.html?cat=collections" data-i18n="nav.collections">Collections</a>
+          <a href="./Shop.dc.html?cat=samples" data-i18n="nav.samples">Samples</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; margin-bottom: 24px; color: var(--idr-ivory-65);" data-i18n="footer.house">House</div>
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: var(--idr-ivory-92);">
+          <a href="./Story.dc.html" data-i18n="nav.story">About</a>
+          <a href="./Contact.dc.html" data-i18n="nav.contact">Contact</a>
+          <a href="./Custom.dc.html" data-i18n="nav.custom">Custom</a>
+          <a href="./Trade.dc.html" data-i18n="nav.collaborate">Collaborate</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; margin-bottom: 24px; color: var(--idr-ivory-65);" data-i18n="footer.help">Info</div>
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; color: var(--idr-ivory-92);">
+          <a href="./Shipping.dc.html" data-i18n="footer.shipping">Shipping &amp; VAT</a>
+          <a href="./Cancellations.dc.html" data-i18n="footer.cancel">Cancellations</a>
+          <a href="./Care.dc.html" data-i18n="footer.care">Care</a>
+          <a href="./Size-guide.dc.html" data-i18n="footer.size">Size</a>
+          <a href="./Privacy.dc.html" data-i18n="footer.privacy">Privacy Policy</a>
+          <a href="./Terms.dc.html" data-i18n="footer.terms">Terms &amp; Conditions</a>
+        </div>
+      </div>
+    </div>
+    <div class="shop-footer-bottom reveal" style="--r: 120ms;">
+      <div>© 2026 Idraren</div>
+      <div style="display: flex; gap: 28px; align-items: center;">
+        <a href="#" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.1" fill="currentColor" stroke="none"/></svg></a>
+            <a href="#" class="social-link" aria-label="Pinterest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="9.25"/><path d="M9.6 19.2c-.35-1.35-.15-2.9.15-4.2l1.2-5.05"/><path d="M8.9 10.2a3.2 3.2 0 1 1 3.6 3.15"/><path d="M12.5 13.35c1.9.35 3.85-.9 4.2-3.15.4-2.6-1.45-4.7-4.1-4.7-2.5 0-4.3 1.5-4.7 3.7"/></svg></a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="pdp-zoom" id="pdp-zoom" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Zoomed product image">
+    <button type="button" class="pdp-zoom-close" id="pdp-zoom-close" aria-label="Close">×</button>
+    <button type="button" class="pdp-zoom-nav pdp-zoom-prev" id="pdp-zoom-prev" aria-label="Previous image">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <img id="pdp-zoom-img" src="" alt="">
+    <button type="button" class="pdp-zoom-nav pdp-zoom-next" id="pdp-zoom-next" aria-label="Next image">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+  <aside class="nl-popup lang-copy" id="nl-popup" role="dialog" aria-modal="false" aria-labelledby="nl-title" aria-hidden="true">
+    <div class="nl-popup-inner">
+      <button type="button" class="nl-close" id="nl-close" aria-label="Close">×</button>
+      <div class="nl-eyebrow" data-i18n="nl.eyebrow">A letter from the Atlas</div>
+      <h2 class="nl-title" id="nl-title" data-i18n="nl.title">Once a month. No more.</h2>
+      <p class="nl-body" data-i18n="nl.body">New arrivals, artisan notes and quiet styling, sent to your inbox.</p>
+      <form class="nl-form" id="nl-form">
+        <input type="email" id="nl-email" required autocomplete="email" data-i18n-placeholder="footer.email" placeholder="Your email address">
+        <button type="submit" data-i18n="nl.submit">Join →</button>
+      </form>
+      <p class="nl-thanks" data-i18n="nl.thanks">Welcome, we'll write when there's something worth saying.</p>
+    </div>
+  </aside>
+
+  <div class="search-overlay" id="search-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="search-label">
+    <div class="search-overlay-top">
+      <button type="button" class="search-close" id="search-close" data-i18n="search.close">Close</button>
+    </div>
+    <div class="search-body">
+      <div class="search-label" id="search-label" data-i18n="search.label">Search</div>
+      <input type="search" class="search-field" id="search-field" data-i18n-placeholder="search.placeholder" placeholder="Search rugs, collections…" autocomplete="off" spellcheck="false">
+      <p class="search-hint" data-i18n="search.hint">Type a name, region, or collection.</p>
+      <ul class="search-results" id="search-results"></ul>
+      <p class="search-empty" id="search-empty" data-i18n="search.empty">No pieces match that yet.</p>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    // Shop mega menu
+    const shopItem = document.getElementById('nav-shop');
+    const shopTrigger = document.getElementById('nav-shop-trigger');
+    if (shopItem && shopTrigger) {
+      const setOpen = (open) => {
+        shopItem.classList.toggle('is-open', open);
+        shopTrigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      };
+      const openSoon = () => { clearTimeout(this._shopCloseT); setOpen(true); };
+      const closeSoon = () => {
+        clearTimeout(this._shopCloseT);
+        this._shopCloseT = setTimeout(() => setOpen(false), 180);
+      };
+      shopItem.addEventListener('mouseenter', openSoon);
+      shopItem.addEventListener('mouseleave', closeSoon);
+      const panel = shopItem.querySelector('.nav-panel');
+      if (panel) {
+        panel.addEventListener('mouseenter', openSoon);
+        panel.addEventListener('mouseleave', closeSoon);
+      }
+      this._shopToggle = (e) => {
+        const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        if (fine) {
+          clearTimeout(this._shopCloseT);
+          setOpen(false);
+          return; // allow navigation to Shop.dc.html
+        }
+        if (!shopItem.classList.contains('is-open')) {
+          e.preventDefault();
+          clearTimeout(this._shopCloseT);
+          setOpen(true);
+          return;
+        }
+        clearTimeout(this._shopCloseT);
+        setOpen(false);
+      };
+      this._shopOutside = (e) => { if (!shopItem.contains(e.target)) setOpen(false); };
+      shopTrigger.addEventListener('click', this._shopToggle);
+      document.addEventListener('click', this._shopOutside);
+    }
+
+    // Scroll reveals
+    const bindReveals = () => {
+      const els = document.querySelectorAll('.reveal');
+      if (!motionOk || typeof IntersectionObserver === 'undefined') {
+        els.forEach((el) => el.classList.add('is-in'));
+        return;
+      }
+      if (this._revealObs) this._revealObs.disconnect();
+      this._revealObs = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-in');
+          this._revealObs.unobserve(entry.target);
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+      els.forEach((el) => this._revealObs.observe(el));
+    };
+    requestAnimationFrame(() => requestAnimationFrame(bindReveals));
+    this._revealRetry = setTimeout(bindReveals, 120);
+
+    // Smooth page scroll (same feel as Home)
+    if (motionOk && finePointer) {
+      document.documentElement.classList.add('idr-smooth');
+      let current = window.scrollY || window.pageYOffset;
+      let target = current;
+      let rafId = null;
+      const ease = 0.18;
+      const gain = 1.25;
+      const maxStep = 360;
+      const maxScroll = () =>
+        Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const clampTarget = (v) => Math.max(0, Math.min(maxScroll(), v));
+      const wheelDelta = (e) => {
+        let dy = e.deltaY;
+        if (e.deltaMode === 1) dy *= 40;
+        else if (e.deltaMode === 2) dy *= window.innerHeight;
+        return dy;
+      };
+      const tick = () => {
+        const diff = target - current;
+        if (Math.abs(diff) < 0.5) {
+          current = target;
+          window.scrollTo(0, Math.round(current));
+          rafId = null;
+          return;
+        }
+        current += diff * ease;
+        window.scrollTo(0, Math.round(current));
+        rafId = requestAnimationFrame(tick);
+      };
+      const kick = () => { if (rafId == null) rafId = requestAnimationFrame(tick); };
+      this._smoothWheel = (e) => {
+        if (e.ctrlKey) return;
+        if (window.Idraren && Idraren.cancelToTop) Idraren.cancelToTop();
+        if (document.documentElement.classList.contains('search-open')) return;
+        if (document.documentElement.classList.contains('mm-open')) return;
+        const dy = wheelDelta(e);
+        const t = e.target;
+        if (t && t.closest) {
+          const field = t.closest('textarea, input, select');
+          if (field && (field.tagName === 'TEXTAREA' || field.tagName === 'INPUT')) {
+            const canUp = field.scrollTop > 0;
+            const canDown = field.scrollTop + field.clientHeight < field.scrollHeight - 1;
+            if ((dy < 0 && canUp) || (dy > 0 && canDown)) return;
+          } else if (t.closest('.nav-panel, .search-overlay')) {
+            return;
+          }
+          const scrollable = t.closest('[data-scroll], .shop-pills, .search-results');
+          if (scrollable) {
+            const canY = scrollable.scrollHeight > scrollable.clientHeight + 1;
+            if (canY) return;
+          }
+        }
+        e.preventDefault();
+        if (rafId == null) {
+          current = window.scrollY || window.pageYOffset;
+          target = current;
+        }
+        const step = Math.sign(dy) * Math.min(Math.abs(dy) * gain, maxStep);
+        if (!step) return;
+        target = clampTarget(target + step);
+        kick();
+      };
+
+      this._smoothAbort = () => {
+        if (rafId != null) { cancelAnimationFrame(rafId); rafId = null; }
+        current = window.scrollY || window.pageYOffset;
+        target = current;
+      };
+      this._smoothSet = (y) => {
+        const v = clampTarget(typeof y === 'number' ? y : 0);
+        current = v;
+        target = v;
+      };
+      if (window.Idraren && Idraren.setSmoothBridge) {
+        Idraren.setSmoothBridge({
+          abort: () => this._smoothAbort(),
+          set: (y) => this._smoothSet(y),
+        });
+      }
+
+      this._smoothDestroy = () => {
+        if (rafId != null) cancelAnimationFrame(rafId);
+        rafId = null;
+        document.documentElement.classList.remove('idr-smooth');
+        window.removeEventListener('wheel', this._smoothWheel);
+        if (window.Idraren && Idraren.setSmoothBridge) Idraren.setSmoothBridge(null);
+      };
+      window.addEventListener('wheel', this._smoothWheel, { passive: false });
+      if (window.Idraren && Idraren.mountToTop) Idraren.mountToTop();
+    }
+
+
+
+    const CATALOG = (window.Idraren && Idraren.getCatalog) ? Idraren.getCatalog() : [];
+
+    const I18N = {
+      en: {
+        topbar: 'Handwoven in the Moroccan Atlas, shipped worldwide.',
+        'nav.shop': 'Shop',
+        'nav.shopLabel': 'Shop',
+        'nav.newArrivals': 'New Arrivals',
+        'nav.bestSellers': 'Best Sellers',
+        'nav.inStock': 'In stock',
+        'nav.sale': 'Customized',
+        'nav.collections': 'Collections',
+        'nav.samples': 'Samples',
+        'nav.story': 'About',
+        'nav.contact': 'Contact',
+        'nav.collaborate': 'Collaborate',
+        'nav.custom': 'Custom',
+        'nav.search': 'Search',
+        'nav.saved': 'Saved',
+        'nav.info': 'Info',
+        'nav.enquiry': 'Enquiry',
+        'pdp.origin': 'Origin',
+        'pdp.size': 'Size',
+        'pdp.fibre': 'Fibre',
+        'pdp.enquire': 'Enquire About This Piece',
+        'pdp.wish': 'Save',
+        'pdp.wishOn': 'Saved',
+        'pdp.swatch': 'Request a Sample',
+        'pdp.quote': 'Request a Quote',
+        'pdp.sizeInterest': 'Interested size',
+        'pdp.sizeGuide': 'Size guide',
+        'pdp.back': 'Back to shop',
+        'pdp.ship': 'Shipping fees are set separately from the rug price. We confirm timing once your enquiry is received.',
+        'pdp.more': 'More from the loom',
+        'pdp.formEyebrow': 'Enquiry',
+        'pdp.formTitle': 'Write about this piece.',
+        'pdp.formBody': 'Tell us the size you have in mind. We reply directly.',
+        'contact.name': 'Name',
+        'contact.email': 'Email',
+        'contact.interest': 'I am enquiring as',
+        'contact.message': 'Message',
+        'contact.namePh': 'Your name',
+        'contact.emailPh': 'you@studio.com',
+        'contact.messagePh': 'Tell us about the piece, size, or project…',
+        'contact.optPrivate': 'Private client',
+        'contact.optTrade': 'Trade / designer / hotel',
+        'contact.optSwatch': 'Swatch / sample',
+        'contact.optQuote': 'Custom quote',
+        'contact.optOther': 'Something else',
+        'contact.send': 'Send enquiry',
+        'contact.note': 'No cart, every piece begins with a conversation.',
+        'contact.wishLabel': 'Saved pieces',
+        'contact.wishClear': 'Clear saved',
+        'contact.thanksTitle': 'Message received.',
+        'contact.thanksBody': 'Thank you, we\'ll reply as soon as we can.',
+        'nl.eyebrow': 'A letter from the Atlas',
+        'nl.title': 'Once a month. No more.',
+        'nl.body': 'New arrivals, artisan notes and quiet styling, sent to your inbox.',
+        'nl.submit': 'Join →',
+        'nl.thanks': 'Bienvenue, nous écrivons quand il y a quelque chose à dire.',
+        'search.close': 'Close',
+        'search.label': 'Search',
+        'search.placeholder': 'Search rugs, collections…',
+        'search.hint': 'Type a name, region, or collection.',
+        'search.empty': 'No pieces match that yet.',
+        'footer.letters': 'Letters from the Atlas.',
+        'footer.lettersBody': 'New arrivals, artisan stories, and styling notes. Once a month, no more.',
+        'footer.email': 'Your email address',
+        'footer.subscribe': 'Subscribe',
+        'footer.tagline': 'Handwoven in the Atlas. shipped worldwide.',
+        'footer.house': 'House',
+        'footer.help': 'Info',
+        'footer.shipping': 'Shipping & VAT',
+        'footer.cancel': 'Cancellations',
+        'footer.size': 'Size',
+        'footer.care': 'Care',
+        'footer.privacy': 'Privacy Policy',
+        'footer.terms': 'Terms & Conditions',
+      },
+      fr: {
+        topbar: 'Tissé main dans l\'Atlas, expédié dans le monde entier.',
+        'nav.shop': 'Boutique',
+        'nav.shopLabel': 'Boutique',
+        'nav.newArrivals': 'Nouveautés',
+        'nav.bestSellers': 'Meilleures ventes',
+        'nav.inStock': 'En stock',
+        'nav.sale': 'Personnalisé',
+        'nav.collections': 'Collections',
+        'nav.samples': 'Échantillons',
+        'nav.story': 'Histoire',
+        'nav.contact': 'Contact',
+        'nav.collaborate': 'Collaborer',
+        'nav.custom': 'Sur mesure',
+        'nav.search': 'Rechercher',
+        'nav.saved': 'Enregistrés',
+        'nav.info': 'Infos',
+        'nav.enquiry': 'Demande',
+        'pdp.origin': 'Origine',
+        'pdp.size': 'Taille',
+        'pdp.fibre': 'Fibre',
+        'pdp.enquire': 'Demander cette pièce',
+        'pdp.wish': 'Sauver',
+        'pdp.wishOn': 'Sauvé',
+        'pdp.swatch': 'Demander un échantillon',
+        'pdp.quote': 'Demander un devis',
+        'pdp.sizeInterest': 'Taille souhaitée',
+        'pdp.sizeGuide': 'Guide des tailles',
+        'pdp.back': 'Retour boutique',
+        'pdp.ship': 'Les frais d’expédition sont séparés du prix du tapis. Nous confirmons le délai après votre demande.',
+        'pdp.more': 'Autres pièces du métier',
+        'pdp.formEyebrow': 'Demande',
+        'pdp.formTitle': 'Écrire à propos de cette pièce.',
+        'pdp.formBody': 'Indiquez la taille que vous avez en tête. Nous répondons directement.',
+        'contact.name': 'Nom',
+        'contact.email': 'E-mail',
+        'contact.interest': 'Je m’adresse en tant que',
+        'contact.message': 'Message',
+        'contact.namePh': 'Votre nom',
+        'contact.emailPh': 'vous@studio.com',
+        'contact.messagePh': 'Parlez-nous de la pièce, de la taille ou du projet…',
+        'contact.optPrivate': 'Client privé',
+        'contact.optTrade': 'Trade / designer / hôtel',
+        'contact.optSwatch': 'Échantillon',
+        'contact.optQuote': 'Devis sur mesure',
+        'contact.optOther': 'Autre chose',
+        'contact.send': 'Envoyer la demande',
+        'contact.note': 'Pas de panier, chaque pièce commence par une conversation.',
+        'contact.wishLabel': 'Pièces sauvées',
+        'contact.wishClear': 'Effacer',
+        'contact.thanksTitle': 'Message reçu.',
+        'contact.thanksBody': 'Merci, nous répondrons dès que possible.',
+        'nl.eyebrow': 'Une lettre de l’Atlas',
+        'nl.title': 'Une fois par mois. Pas plus.',
+        'nl.body': 'Nouveautés, notes d’artisans et styling calme, directement dans votre boîte.',
+        'nl.submit': 'Rejoindre →',
+        'nl.thanks': 'Bienvenue, nous écrivons quand il y a quelque chose à dire.',
+        'search.close': 'Fermer',
+        'search.label': 'Rechercher',
+        'search.placeholder': 'Rechercher tapis, collections…',
+        'search.hint': 'Nom, région ou collection.',
+        'search.empty': 'Aucune pièce ne correspond pour l’instant.',
+        'footer.letters': 'Lettres de l’Atlas.',
+        'footer.lettersBody': 'Nouveautés, histoires d’artisans et notes de style, une fois par mois, pas plus.',
+        'footer.email': 'Votre adresse e-mail',
+        'footer.subscribe': 'S’abonner',
+        'footer.tagline': 'Tissé main dans l’Atlas. Expédié dans le monde entier.',
+        'footer.house': 'Maison',
+        'footer.help': 'Info',
+        'footer.shipping': 'Livraison & TVA',
+        'footer.cancel': 'Annulations',
+        'footer.size': 'Tailles',
+        'footer.care': 'Entretien',
+        'footer.privacy': 'Politique de confidentialité',
+        'footer.terms': 'Conditions générales',
+      },
+    };
+
+    let lang = (localStorage.getItem('idraren-lang') === 'fr') ? 'fr' : 'en';
+    const params = new URLSearchParams(window.location.search);
+    let currentId = params.get('id') || 'rug-45';
+    let current = CATALOG.find((p) => p.id === currentId) || CATALOG[0];
+    if (!current) current = { id: 'rug-45', name: 'Rug 45', image: './images/rugs/rug-45.png', gallery: ['./images/rugs/rug-45.png'], origin: { en: 'Anfa', fr: 'Anfa' }, style: { en: 'Handwoven', fr: 'Tissé main' }, size: '5 × 8 ft', sizes: ['5 × 8 ft'], price: 'from $2, 640', fibre: { en: 'Handwoven wool', fr: 'Laine tissée main' }, body: { en: '', fr: '' } };
+    currentId = current.id;
+
+    const setText = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    };
+
+    let selectedSize = current.size;
+    let galleryIndex = 0;
+    const wishBtn = document.getElementById('pdp-wish');
+    const sizeWrap = document.getElementById('pdp-sizes');
+    const sizeRow = document.getElementById('pdp-size-row');
+    const galleryThumbs = document.getElementById('pdp-gallery-thumbs');
+
+    const productGallery = () => (current.gallery && current.gallery.length ? current.gallery : [current.image]);
+
+    const zoomPrev = document.getElementById('pdp-zoom-prev');
+    const zoomNext = document.getElementById('pdp-zoom-next');
+
+    const syncZoomNav = () => {
+      const n = productGallery().length;
+      const show = n > 1;
+      if (zoomPrev) zoomPrev.hidden = !show;
+      if (zoomNext) zoomNext.hidden = !show;
+    };
+
+    const stepGallery = (delta) => {
+      const imgs = productGallery();
+      if (imgs.length <= 1) return;
+      const next = (galleryIndex + delta + imgs.length) % imgs.length;
+      setGalleryImage(next);
+    };
+
+    const setGalleryImage = (index) => {
+      const imgs = productGallery();
+      galleryIndex = Math.max(0, Math.min(index, imgs.length - 1));
+      const src = imgs[galleryIndex];
+      const img = document.getElementById('pdp-image');
+      if (img) {
+        img.src = src;
+        img.alt = current.name;
+      }
+      const zoomImg = document.getElementById('pdp-zoom-img');
+      if (zoomImg) {
+        zoomImg.src = src;
+        zoomImg.alt = current.name;
+      }
+      if (galleryThumbs) {
+        galleryThumbs.querySelectorAll('.pdp-gallery-thumb').forEach((btn, i) => {
+          btn.classList.toggle('is-on', i === galleryIndex);
+          btn.setAttribute('aria-selected', i === galleryIndex ? 'true' : 'false');
+        });
+      }
+      syncZoomNav();
+    };
+
+    const renderGallery = () => {
+      if (!galleryThumbs) return;
+      const imgs = productGallery();
+      galleryThumbs.hidden = imgs.length <= 1;
+      if (imgs.length <= 1) {
+        galleryThumbs.innerHTML = '';
+        return;
+      }
+      galleryThumbs.innerHTML = imgs.map((src, i) =>
+        '<button type="button" class="pdp-gallery-thumb' + (i === galleryIndex ? ' is-on' : '') + '" data-index="' + i + '" role="tab" aria-selected="' + (i === galleryIndex ? 'true' : 'false') + '" aria-label="Image ' + (i + 1) + ' of ' + imgs.length + '">' +
+        '<img src="' + src + '" alt="">' +
+        '</button>'
+      ).join('');
+    };
+
+    const syncWishBtn = () => {
+      if (!wishBtn || !window.Idraren) return;
+      const on = Idraren.Wishlist.has(current.id);
+      wishBtn.classList.toggle('is-on', on);
+      const dict = I18N[lang] || I18N.en;
+      wishBtn.textContent = on ? (dict['pdp.wishOn'] || 'Saved') : (dict['pdp.wish'] || 'Save');
+      wishBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    };
+
+    const contactHref = (intent) => {
+      const q = new URLSearchParams();
+      q.set('piece', current.name);
+      q.set('id', current.id);
+      if (intent) q.set('intent', intent);
+      if (selectedSize) q.set('size', selectedSize);
+      return './Contact.dc.html?' + q.toString();
+    };
+
+    // On-page enquire form
+    let enquireIntent = 'enquire';
+    let enquireAutofill = '';
+    const enquireBlock = document.getElementById('pdp-enquire-block');
+    const enquireForm = document.getElementById('pdp-enquire-form');
+    const enquireThanks = document.getElementById('pdp-enquire-thanks');
+    const enquireMessage = document.getElementById('pdp-enq-message');
+    const enquirePieceName = document.getElementById('pdp-enquire-piece-name');
+    const enquirePieceMeta = document.getElementById('pdp-enquire-piece-meta');
+    const interestInput = document.getElementById('pdp-enq-interest');
+    const selectRoot = document.getElementById('pdp-enq-select');
+    const selectTrigger = document.getElementById('pdp-enq-select-trigger');
+    const selectMenu = document.getElementById('pdp-enq-select-menu');
+    const selectValue = document.getElementById('pdp-enq-select-value');
+    const wishRoot = document.getElementById('pdp-enquire-wish');
+    const wishList = document.getElementById('pdp-enquire-wish-list');
+    const wishClear = document.getElementById('pdp-enquire-wish-clear');
+
+    const setInterest = (value, label) => {
+      if (interestInput) interestInput.value = value;
+      if (selectValue) selectValue.textContent = label;
+      if (selectRoot) {
+        selectRoot.querySelectorAll('.contact-select-option').forEach((opt) => {
+          const on = opt.getAttribute('data-value') === value;
+          opt.classList.toggle('is-active', on);
+          opt.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+      }
+    };
+    const closeSelect = () => {
+      if (!selectRoot) return;
+      selectRoot.classList.remove('is-open');
+      if (selectTrigger) selectTrigger.setAttribute('aria-expanded', 'false');
+      if (selectMenu) selectMenu.hidden = true;
+    };
+    if (selectTrigger && selectRoot) {
+      selectTrigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (selectRoot.classList.contains('is-open')) closeSelect();
+        else {
+          selectRoot.classList.add('is-open');
+          selectTrigger.setAttribute('aria-expanded', 'true');
+          if (selectMenu) selectMenu.hidden = false;
+        }
+      });
+      selectRoot.querySelectorAll('.contact-select-option').forEach((opt) => {
+        opt.addEventListener('click', () => {
+          setInterest(opt.getAttribute('data-value'), opt.textContent.trim());
+          closeSelect();
+        });
+      });
+      document.addEventListener('click', (e) => {
+        if (selectRoot && !selectRoot.contains(e.target)) closeSelect();
+      });
+    }
+
+    const buildEnquireMessage = (intent) => {
+      const fr = lang === 'fr';
+      const piece = current.name;
+      const sizeLabel = selectedSize ? (this._sizeBoth ? this._sizeBoth(selectedSize) : selectedSize) : '';
+      const lines = [];
+      if (intent === 'swatch') {
+        lines.push(fr
+          ? 'Je souhaite demander un échantillon pour ' + piece + '.'
+          : 'I would like to request a swatch for ' + piece + '.');
+      } else if (intent === 'quote') {
+        lines.push(fr
+          ? 'Je souhaite un devis pour ' + piece + '.'
+          : 'I would like a quote for ' + piece + '.');
+      } else {
+        lines.push(fr
+          ? 'Je souhaite en savoir plus sur ' + piece + '.'
+          : 'I would like to enquire about ' + piece + '.');
+      }
+      if (sizeLabel) {
+        lines.push(fr ? 'Taille souhaitée : ' + sizeLabel + '.' : 'Interested size: ' + sizeLabel + '.');
+      }
+      if (window.Idraren && Idraren.Wishlist.count() > 0) {
+        const names = Idraren.Wishlist.names();
+        lines.push(fr
+          ? 'Pièces sauvées : ' + names.join(', ') + '.'
+          : 'Saved pieces: ' + names.join(', ') + '.');
+      }
+      return lines.join('\n\n');
+    };
+
+    const renderEnquireWish = () => {
+      if (!wishRoot || !wishList || !window.Idraren) return;
+      const items = Idraren.Wishlist.all();
+      if (!items.length) {
+        wishRoot.hidden = true;
+        wishList.innerHTML = '';
+        return;
+      }
+      wishRoot.hidden = false;
+      wishList.innerHTML = items.map((p) =>
+        '<li><span class="name">' + p.name + '</span><span class="meta">' + (p.note || p.price || '') + '</span></li>'
+      ).join('');
+    };
+    renderEnquireWish();
+    if (wishClear) {
+      wishClear.addEventListener('click', () => {
+        if (window.Idraren) Idraren.Wishlist.clear();
+        renderEnquireWish();
+      });
+    }
+
+    const syncEnquireMeta = () => {
+      if (enquirePieceName) enquirePieceName.textContent = current.name;
+      if (enquirePieceMeta) {
+        enquirePieceMeta.textContent = this._sizeBoth
+          ? this._sizeBoth(selectedSize || current.size)
+          : (selectedSize || current.size);
+      }
+    };
+
+    const openEnquire = (intent) => {
+      enquireIntent = intent || 'enquire';
+      if (enquireForm) enquireForm.hidden = false;
+      if (enquireThanks) {
+        enquireThanks.hidden = true;
+        enquireThanks.classList.remove('is-visible');
+      }
+      closeSelect();
+      let interestVal = 'private';
+      if (intent === 'swatch') interestVal = 'swatch';
+      else if (intent === 'quote') interestVal = 'quote';
+      const opt = selectRoot && selectRoot.querySelector('.contact-select-option[data-value="' + interestVal + '"]');
+      if (opt) setInterest(interestVal, opt.textContent.trim());
+      syncEnquireMeta();
+      renderEnquireWish();
+      const msg = buildEnquireMessage(enquireIntent);
+      enquireAutofill = msg;
+      if (enquireMessage) enquireMessage.value = msg;
+      if (enquireBlock) {
+        enquireBlock.hidden = false;
+        enquireBlock.setAttribute('aria-hidden', 'false');
+        enquireBlock.classList.add('is-open');
+        enquireBlock.classList.remove('is-flash');
+        requestAnimationFrame(() => {
+          enquireBlock.classList.add('is-flash');
+          enquireBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          setTimeout(() => {
+            const nameField = document.getElementById('pdp-enq-name');
+            if (nameField) nameField.focus({ preventScroll: true });
+          }, 500);
+        });
+      }
+    };
+
+    // Stay closed until a CTA is clicked — never show on casual scroll
+    if (enquireBlock) {
+      enquireBlock.hidden = true;
+      enquireBlock.classList.remove('is-open');
+      enquireBlock.setAttribute('aria-hidden', 'true');
+    }
+
+    const bindEnquireCta = (el, intent) => {
+      if (!el) return;
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        openEnquire(intent);
+      });
+    };
+
+    const CM_BY_FT = {
+      '4 × 6 ft': '120 × 180 cm',
+      '5 × 7 ft': '150 × 210 cm',
+      '5 × 8 ft': '150 × 240 cm',
+      '6 × 8 ft': '180 × 240 cm',
+      '6 × 9 ft': '180 × 270 cm',
+      '8 × 10 ft': '240 × 300 cm',
+      '9 × 12 ft': '270 × 360 cm',
+    };
+    const sizeCm = (ft) => CM_BY_FT[ft] || '';
+    const sizeBoth = (ft) => {
+      const cm = sizeCm(ft);
+      return cm ? cm + ' (' + ft + ')' : ft;
+    };
+    this._sizeBoth = sizeBoth;
+
+    const renderSizes = () => {
+      if (!sizeRow || !sizeWrap) return;
+      const opts = current.sizes && current.sizes.length ? current.sizes : [current.size];
+      if (opts.length <= 1) {
+        sizeWrap.hidden = true;
+        selectedSize = current.size;
+        sizeRow.innerHTML = '';
+        return;
+      }
+      sizeWrap.hidden = false;
+      if (!opts.includes(selectedSize)) selectedSize = current.size;
+      sizeRow.innerHTML = opts.map((s) => {
+        return '<button type="button" class="pdp-size-opt' + (s === selectedSize ? ' is-on' : '') + '" data-size="' + s.replace(/"/g, '') + '">' + sizeBoth(s) + '</button>';
+      }).join('');
+    };
+
+    const hydrateProduct = () => {
+      const L = lang === 'fr' ? 'fr' : 'en';
+      galleryIndex = 0;
+      renderGallery();
+      setGalleryImage(0);
+      setText('pdp-crumb-name', current.name);
+      setText('pdp-kicker', current.origin[L] + ' · ' + current.style[L]);
+      setText('pdp-name', current.name);
+      setText('pdp-price', current.price);
+      setText('pdp-note', sizeBoth(current.size) + ' · ' + current.fibre[L]);
+      setText('pdp-body', current.body[L]);
+      setText('pdp-origin', current.origin[L]);
+      setText('pdp-size', sizeBoth(current.size));
+      setText('pdp-fibre', current.fibre[L]);
+      renderSizes();
+      syncEnquireMeta();
+      if (enquireMessage && (!enquireMessage.value || enquireMessage.value === enquireAutofill)) {
+        const msg = buildEnquireMessage(enquireIntent);
+        enquireAutofill = msg;
+        enquireMessage.value = msg;
+      }
+      syncWishBtn();
+      document.title = current.name + ', Idraren';
+    };
+
+    hydrateProduct();
+    bindEnquireCta(document.getElementById('pdp-enquire'), 'enquire');
+    bindEnquireCta(document.getElementById('pdp-swatch'), 'swatch');
+    bindEnquireCta(document.getElementById('pdp-quote'), 'quote');
+
+    if (enquireForm) {
+      enquireForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!enquireForm.checkValidity()) { enquireForm.reportValidity(); return; }
+        const data = new FormData(enquireForm);
+        const name = String(data.get('name') || '').trim();
+        const email = String(data.get('email') || '').trim();
+        const interest = String(data.get('interest') || '');
+        const message = String(data.get('message') || '').trim();
+        const subject = encodeURIComponent('Idraren enquiry — ' + current.name + ' — ' + interest);
+        const body = encodeURIComponent(
+          'Name: ' + name + '\nEmail: ' + email + '\nInterest: ' + interest +
+          '\nPiece: ' + current.name + '\nSize: ' + (selectedSize || current.size) +
+          '\n\n' + message
+        );
+        window.location.href = 'mailto:hello@idraren.com?subject=' + subject + '&body=' + body;
+        enquireForm.hidden = true;
+        if (enquireThanks) {
+          enquireThanks.hidden = false;
+          enquireThanks.classList.add('is-visible');
+        }
+      });
+    }
+
+    if (galleryThumbs) {
+      galleryThumbs.addEventListener('click', (e) => {
+        const btn = e.target.closest('.pdp-gallery-thumb');
+        if (!btn) return;
+        const idx = parseInt(btn.getAttribute('data-index'), 10);
+        if (!Number.isNaN(idx)) setGalleryImage(idx);
+      });
+    }
+
+    if (sizeRow) {
+      sizeRow.addEventListener('click', (e) => {
+        const btn = e.target.closest('.pdp-size-opt');
+        if (!btn) return;
+        selectedSize = btn.getAttribute('data-size') || current.size;
+        sizeRow.querySelectorAll('.pdp-size-opt').forEach((el) => {
+          el.classList.toggle('is-on', el === btn);
+        });
+        syncEnquireMeta();
+        if (enquireMessage && (!enquireMessage.value || enquireMessage.value === enquireAutofill)) {
+          const msg = buildEnquireMessage(enquireIntent);
+          enquireAutofill = msg;
+          enquireMessage.value = msg;
+        }
+      });
+    }
+
+    if (wishBtn) {
+      wishBtn.addEventListener('click', () => {
+        if (!window.Idraren) return;
+        const L = lang === 'fr' ? 'fr' : 'en';
+        const result = Idraren.Wishlist.toggle({
+          id: current.id,
+          name: current.name,
+          price: current.price,
+          image: current.image,
+          // cm and ft here too — this note is what the Saved list renders.
+          note: current.origin[L] + ' · ' + sizeBoth(current.size),
+        });
+        syncWishBtn();
+        if (Idraren.savedPopup) {
+          Idraren.savedPopup({
+            saved: result.saved,
+            name: current.name,
+            note: current.origin[L] + ' · ' + sizeBoth(current.size),
+            image: current.image,
+            lang: L,
+          });
+        }
+        renderEnquireWish();
+        if (enquireMessage && (!enquireMessage.value || enquireMessage.value === enquireAutofill)) {
+          const msg = buildEnquireMessage(enquireIntent);
+          enquireAutofill = msg;
+          enquireMessage.value = msg;
+        }
+      });
+    }
+
+    // Image zoom
+    const zoomRoot = document.getElementById('pdp-zoom');
+    const zoomClose = document.getElementById('pdp-zoom-close');
+    const mediaBtn = document.getElementById('pdp-media');
+    const openZoom = () => {
+      if (!zoomRoot) return;
+      syncZoomNav();
+      zoomRoot.classList.add('is-open');
+      zoomRoot.setAttribute('aria-hidden', 'false');
+      document.documentElement.classList.add('search-open');
+    };
+    const closeZoom = () => {
+      if (!zoomRoot) return;
+      zoomRoot.classList.remove('is-open');
+      zoomRoot.setAttribute('aria-hidden', 'true');
+      const so = document.getElementById('search-overlay');
+      if (!so || !so.classList.contains('is-open')) {
+        document.documentElement.classList.remove('search-open');
+      }
+    };
+    if (mediaBtn) mediaBtn.addEventListener('click', openZoom);
+    if (zoomClose) zoomClose.addEventListener('click', (e) => { e.stopPropagation(); closeZoom(); });
+    if (zoomPrev) zoomPrev.addEventListener('click', (e) => { e.stopPropagation(); stepGallery(-1); });
+    if (zoomNext) zoomNext.addEventListener('click', (e) => { e.stopPropagation(); stepGallery(1); });
+    if (zoomRoot) zoomRoot.addEventListener('click', (e) => { if (e.target === zoomRoot) closeZoom(); });
+    this._zoomEsc = (e) => {
+      if (!zoomRoot || !zoomRoot.classList.contains('is-open')) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeZoom();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        stepGallery(-1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        stepGallery(1);
+      }
+    };
+    window.addEventListener('keydown', this._zoomEsc);
+
+    if (window.Idraren) this._nl = Idraren.mountNewsletter({ delayMs: 8000 });
+
+    // replace old hydrate block marker, keep applyLang below
+    const applyLang = (next) => {
+      lang = next;
+      document.documentElement.lang = next;
+      localStorage.setItem('idraren-lang', next);
+      const dict = I18N[next] || I18N.en;
+      document.querySelectorAll('[data-i18n]').forEach((el) => {
+        const key = el.getAttribute('data-i18n');
+        if (key && dict[key] != null) el.textContent = dict[key];
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (key && dict[key] != null) el.setAttribute('placeholder', dict[key]);
+      });
+      document.querySelectorAll('.lang-toggle .lang-opt').forEach((opt) => {
+        opt.classList.toggle('is-on', opt.getAttribute('data-lang') === next);
+      });
+      hydrateProduct();
+    };
+    const setLang = (next) => {
+      if (next === lang) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        applyLang(next);
+        return;
+      }
+      document.documentElement.classList.add('is-lang-switching');
+      clearTimeout(this._langT);
+      this._langT = setTimeout(() => {
+        applyLang(next);
+        requestAnimationFrame(() => document.documentElement.classList.remove('is-lang-switching'));
+      }, 220);
+    };
+    applyLang(lang);
+    requestAnimationFrame(() => applyLang(lang));
+    this._langClick = (e) => {
+      const btn = e.target.closest && e.target.closest('.lang-toggle');
+      if (!btn) return;
+      e.preventDefault();
+      const hit = e.target.closest('.lang-opt');
+      if (hit && hit.getAttribute('data-lang')) setLang(hit.getAttribute('data-lang'));
+      else setLang(lang === 'en' ? 'fr' : 'en');
+    };
+    document.addEventListener('click', this._langClick);
+
+    // Search overlay (same catalog as Home shelf)
+    const searchCatalog = CATALOG.map((p) => ({
+      name: p.name,
+      image: p.image,
+      note: p.origin.en + ' · ' + p.size,
+      price: p.price,
+      tags: p.tags,
+      href: './Product.dc.html?id=' + p.id,
+    }));
+    const searchOverlay = document.getElementById('search-overlay');
+    const searchField = document.getElementById('search-field');
+    const searchResults = document.getElementById('search-results');
+    const searchOpenBtn = document.getElementById('search-open');
+    const searchCloseBtn = document.getElementById('search-close');
+    const renderSearch = (query) => {
+      if (!searchResults || !searchOverlay) return;
+      const q = (query || '').trim().toLowerCase();
+      const hits = !q
+        ? searchCatalog.slice(0, 4)
+        : searchCatalog.filter((p) => (p.name + ' ' + p.note + ' ' + p.tags).toLowerCase().includes(q));
+      searchOverlay.classList.toggle('is-empty', hits.length === 0);
+      searchResults.innerHTML = hits.map((p) =>
+        '<li><a class="search-result" href="' + (p.href || './Shop.dc.html') + '">' +
+          '<div class="search-result-thumb"><img src="' + p.image + '" alt=""></div>' +
+          '<div><div class="search-result-name">' + p.name + '</div>' +
+          '<p class="search-result-meta">' + p.note + '</p></div>' +
+          '<div class="search-result-price">' + p.price + '</div>' +
+        '</a></li>'
+      ).join('');
+    };
+    const openSearch = () => {
+      if (!searchOverlay) return;
+      searchOverlay.classList.add('is-open');
+      searchOverlay.setAttribute('aria-hidden', 'false');
+      document.documentElement.classList.add('search-open');
+      renderSearch(searchField ? searchField.value : '');
+      requestAnimationFrame(() => { if (searchField) searchField.focus(); });
+    };
+    const closeSearch = () => {
+      if (!searchOverlay) return;
+      searchOverlay.classList.remove('is-open');
+      searchOverlay.setAttribute('aria-hidden', 'true');
+      document.documentElement.classList.remove('search-open');
+      if (searchOpenBtn) searchOpenBtn.focus();
+    };
+    if (searchOpenBtn) searchOpenBtn.addEventListener('click', (e) => { e.preventDefault(); openSearch(); });
+    if (searchCloseBtn) searchCloseBtn.addEventListener('click', closeSearch);
+
+    // Mobile menu
+    const mmBtn = document.getElementById('mm-toggle');
+    const mmPanel = document.getElementById('mm-panel');
+    if (mmBtn && mmPanel) {
+      const closeMM = () => {
+        mmBtn.setAttribute('aria-expanded', 'false');
+        mmPanel.classList.remove('is-open');
+        mmPanel.setAttribute('aria-hidden', 'true');
+        document.documentElement.classList.remove('mm-open');
+      };
+      const openMM = () => {
+        mmBtn.setAttribute('aria-expanded', 'true');
+        mmPanel.classList.add('is-open');
+        mmPanel.setAttribute('aria-hidden', 'false');
+        document.documentElement.classList.add('mm-open');
+      };
+      mmBtn.addEventListener('click', () => mmPanel.classList.contains('is-open') ? closeMM() : openMM());
+      const mmCloseBtn = document.getElementById('mm-close');
+      if (mmCloseBtn) mmCloseBtn.addEventListener('click', closeMM);
+      mmPanel.querySelectorAll('a').forEach((a) => a.addEventListener('click', closeMM));
+      this._mmEsc = (e) => { if (e.key === 'Escape' && mmPanel.classList.contains('is-open')) closeMM(); };
+      document.addEventListener('keydown', this._mmEsc);
+    }
+
+    if (searchField) searchField.addEventListener('input', () => renderSearch(searchField.value));
+    this._searchKey = (e) => {
+      if (e.key === 'Escape' && searchOverlay && searchOverlay.classList.contains('is-open')) {
+        e.preventDefault();
+        closeSearch();
+      }
+      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        if (searchOverlay && searchOverlay.classList.contains('is-open')) closeSearch();
+        else openSearch();
+      }
+    };
+    document.addEventListener('keydown', this._searchKey);
+    this._searchDestroy = () => {
+      document.removeEventListener('keydown', this._searchKey);
+      document.documentElement.classList.remove('search-open');
+    };
+  }
+  componentWillUnmount() {
+    clearTimeout(this._shopCloseT);
+    clearTimeout(this._revealRetry);
+    clearTimeout(this._langT);
+    if (this._langClick) document.removeEventListener('click', this._langClick);
+    if (this._searchDestroy) this._searchDestroy();
+    if (this._smoothDestroy) this._smoothDestroy();
+    if (this._revealObs) this._revealObs.disconnect();
+    if (this._zoomEsc) window.removeEventListener('keydown', this._zoomEsc);
+    if (this._nl && this._nl.destroy) this._nl.destroy();
+    const shopTrigger = document.getElementById('nav-shop-trigger');
+    if (shopTrigger && this._shopToggle) shopTrigger.removeEventListener('click', this._shopToggle);
+    if (this._shopOutside) document.removeEventListener('click', this._shopOutside);
+  }
+  renderVals() {
+    const h = React.createElement;
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id') || 'rug-45';
+    const catalog = (window.Idraren && Idraren.getCatalog) ? Idraren.getCatalog() : [];
+    const others = catalog.filter((p) => p.id !== id).slice(0, 3);
+    const moreTiles = h('div', { style: { display: 'contents' } },
+      others.map((p, i) => h('a', {
+        key: p.id,
+        href: './Product.dc.html?id=' + p.id,
+        className: 'product-tile reveal',
+        style: { ['--r']: (i * 90) + 'ms' },
+      },
+        h('div', { className: 'product-media' },
+          h('img', { src: p.image, alt: p.name, loading: 'lazy' })
+        ),
+        h('h2', { className: 'product-name' }, p.name),
+        h('div', { className: 'product-meta' },
+          h('span', null, p.note),
+          h('span', null, p.price)
+        )
+      ))
+    );
+    return { moreTiles };
+  }
+}
+</script>
+</body>
+</html>
