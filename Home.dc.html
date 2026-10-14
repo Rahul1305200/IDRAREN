@@ -2276,6 +2276,30 @@
       opacity: 0;
     }
 
+    /* Armadillo-style tag; --tag-x / --tag-y are set in JS to the rug's own
+       bottom-left corner inside the contain-fit frame. */
+    .shelf-tag {
+      position: absolute;
+      left: var(--tag-x, 12px);
+      bottom: var(--tag-y, 12px);
+      z-index: 2;
+      padding: 6px 10px;
+      background: rgba(49, 47, 35, 0.82);
+      color: var(--idr-ivory);
+      font-family: 'Manrope', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    @media (max-width: 720px) {
+      .shelf-tag { padding: 5px 7px; font-size: 7px; letter-spacing: 0.12em; }
+    }
+
     /* Copy sits under the photograph (Armadillo-style): no scrim over the rug.
        Line 1 name + collection, line 2 price. */
     .shelf-copy {
@@ -3925,6 +3949,29 @@ class Component extends DCLogic {
       shelf.addEventListener('wheel', this._shelfWheel, { passive: false });
     }
 
+    // "New arrival" tags sit on the rug itself, not the frame corner. The rug
+    // PNGs are object-fit: contain, so work out where the picture actually
+    // lands inside its 2:3 frame and inset the tag from that corner.
+    const placeShelfTags = () => {
+      document.querySelectorAll('#shop .shelf-card:not(.shelf-end) .shelf-media').forEach((frame) => {
+        const img = frame.querySelector('.shelf-img-default');
+        if (!img || !img.naturalWidth) return;
+        const fw = frame.clientWidth, fh = frame.clientHeight;
+        const scale = Math.min(fw / img.naturalWidth, fh / img.naturalHeight);
+        const offX = (fw - img.naturalWidth * scale) / 2;
+        const offY = (fh - img.naturalHeight * scale) / 2;
+        frame.style.setProperty('--tag-x', Math.round(offX + 12) + 'px');
+        frame.style.setProperty('--tag-y', Math.round(offY + 22) + 'px');
+      });
+    };
+    this._placeShelfTags = placeShelfTags;
+    this._shelfTagLoad = (e) => {
+      if (e.target && e.target.classList && e.target.classList.contains('shelf-img-default')) placeShelfTags();
+    };
+    document.addEventListener('load', this._shelfTagLoad, true);
+    window.addEventListener('resize', placeShelfTags);
+    requestAnimationFrame(placeShelfTags);
+
     // Native viewport scroll. Custom wheel preventDefault was fighting sticky
     // and trackpad scrolling after overflow hacks on html/body. Keep a thin
     // bridge for Top / programmatic jumps only.
@@ -4012,6 +4059,7 @@ class Component extends DCLogic {
         'shop.title': 'New Arrivals',
         'shop.enquire': 'View',
         'shop.view': 'View',
+        'shop.newTag': 'New arrival',
         'shop.continue': 'Continue',
         'shop.continuePlate': 'Continue · Collections',
         'shop.shopAll': 'Collections',
@@ -4148,6 +4196,7 @@ class Component extends DCLogic {
         'shop.title': 'Une sélection tranquille venue du métier.',
         'shop.enquire': 'Voir',
         'shop.view': 'Voir',
+        'shop.newTag': 'Nouveauté',
         'shop.continue': 'Continuer',
         'shop.continuePlate': 'Continuer · Collections',
         'shop.shopAll': 'Collections',
@@ -4761,6 +4810,8 @@ class Component extends DCLogic {
     if (this._selectOutside) document.removeEventListener('click', this._selectOutside);
     if (this._searchDestroy) this._searchDestroy();
     if (this._shelfDestroy) this._shelfDestroy();
+    if (this._shelfTagLoad) document.removeEventListener('load', this._shelfTagLoad, true);
+    if (this._placeShelfTags) window.removeEventListener('resize', this._placeShelfTags);
     if (this._smoothDestroy) this._smoothDestroy();
     if (this._onResize) window.removeEventListener('resize', this._onResize);
     if (this._videoVis) document.removeEventListener('visibilitychange', this._videoVis);
@@ -4872,7 +4923,8 @@ class Component extends DCLogic {
         h('a', { href: './Product.dc.html?id=' + p.id, className: 'shelf-hit', tabIndex: -1, 'aria-hidden': 'true' }),
         h('div', { className: 'shelf-media' },
           h('img', { className: 'shelf-img-default', src: p.image, alt: p.name, loading: i > 2 ? 'lazy' : 'eager' }),
-          p.hoverImage ? h('img', { className: 'shelf-img-hover', src: p.hoverImage, alt: '', loading: 'lazy', 'aria-hidden': 'true' }) : null
+          p.hoverImage ? h('img', { className: 'shelf-img-hover', src: p.hoverImage, alt: '', loading: 'lazy', 'aria-hidden': 'true' }) : null,
+          h('span', { className: 'shelf-tag', 'data-i18n': 'shop.newTag' }, 'New arrival')
         ),
         h('div', { className: 'shelf-copy' },
           h('h3', { className: 'shelf-name' },
