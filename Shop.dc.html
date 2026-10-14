@@ -1849,17 +1849,26 @@ class Component extends DCLogic {
 
     if (window.Idraren && Idraren.mountToTop) Idraren.mountToTop();
 
-    const scrollToCatalogue = () => {
+    // opts.ifNeeded: leave the page where it is when the first result is
+    // already on screen, and move without animation when it is not — a
+    // category switch must not make the page glide.
+    const scrollToCatalogue = (opts) => {
       syncShopChrome();
       if (this._syncShopPin) this._syncShopPin();
       const browse = document.getElementById('shop-browse');
       const spacer = document.getElementById('shop-browse-spacer');
       if (!browse) return;
       const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--shop-header-h')) || headerEl?.offsetHeight || 108;
+      const ifNeeded = !!(opts && opts.ifNeeded);
+      if (ifNeeded) {
+        const first = document.querySelector('.product-card:not(.is-hidden)');
+        const r = first && first.getBoundingClientRect();
+        if (r && r.top >= headerH && r.top < window.innerHeight * 0.8) return;
+      }
       // Aim so the browse bar docks under the header — the "perfect view".
       const marker = (spacer && spacer.offsetHeight > 0) ? spacer : (spacer || browse);
       const top = marker.getBoundingClientRect().top + window.pageYOffset - headerH;
-      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+      window.scrollTo({ top: Math.max(0, top), behavior: ifNeeded ? 'auto' : 'smooth' });
       // Re-pin after the smooth scroll settles.
       clearTimeout(this._cataloguePinT);
       this._cataloguePinT = setTimeout(() => {
@@ -2288,7 +2297,6 @@ class Component extends DCLogic {
       }
       const data = CAT_HERO[key] || CAT_HERO.all;
       const dict = I18N[lang] || I18N.en;
-      const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       const applyCopy = () => {
         if (catHeroTitle) {
@@ -2331,14 +2339,7 @@ class Component extends DCLogic {
       };
 
       clearTimeout(this._catHeroSwapT);
-      if (catHero && motionOk && catHero.classList.contains('is-ready')) {
-        catHero.classList.add('is-swap');
-        catHero.classList.remove('is-ready');
-        this._catHeroSwapT = setTimeout(swap, 280);
-      } else {
-        if (catHero) catHero.classList.remove('is-ready');
-        swap();
-      }
+      swap();
     };
 
     const movePillThumb = (row, thumb, attr, value) => {
@@ -2595,11 +2596,10 @@ class Component extends DCLogic {
         const btn = e.target.closest('button[data-cat]');
         if (!btn) return;
         holdHeightDuring(() => setCategory(btn.getAttribute('data-cat')));
-        // Bring the results into view. Clicked from the banner area, the new
-        // pieces sat below the fold and the page looked stuck. Runs after
+        // Bring the results into view only if they are off screen. Runs after
         // holdHeightDuring's two-frame restore so the two scrolls don't fight.
         requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => {
-          if (this._scrollToCatalogue) this._scrollToCatalogue();
+          if (this._scrollToCatalogue) this._scrollToCatalogue({ ifNeeded: true });
         })));
       });
     }
@@ -2609,7 +2609,7 @@ class Component extends DCLogic {
         if (!btn) return;
         holdHeightDuring(() => setCollection(btn.getAttribute('data-col')));
         requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => {
-          if (this._scrollToCatalogue) this._scrollToCatalogue();
+          if (this._scrollToCatalogue) this._scrollToCatalogue({ ifNeeded: true });
         })));
       });
     }

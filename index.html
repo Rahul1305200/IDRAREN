@@ -1029,8 +1029,8 @@
     }
 
     @keyframes heroVideoIn {
-      from { opacity: 0; transform: scale(1.04); }
-      to { opacity: 1; transform: scale(1); }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     /* Story — same centre line as #collaborate (1fr | 1fr). Image fills the
@@ -2009,28 +2009,6 @@
       #contact.contact { padding: 72px 24px; }
     }
 
-    /* Scroll reveals: fade only (no rise-from-below). Hero keeps its own sequence. */
-    @media (prefers-reduced-motion: no-preference) {
-      .reveal {
-        opacity: 0;
-        transition: opacity 1.05s cubic-bezier(0.22, 1, 0.36, 1);
-        transition-delay: var(--r, 0ms);
-        will-change: opacity;
-      }
-
-      .reveal-media {
-        opacity: 0;
-        transition: opacity 1.25s cubic-bezier(0.22, 1, 0.36, 1);
-        transition-delay: var(--r, 0ms);
-        will-change: opacity;
-      }
-
-      .reveal.is-in,
-      .reveal-media.is-in {
-        opacity: 1;
-      }
-    }
-
     /* Smooth scroll (Armadillo-style): native wheel is hijacked on fine
        pointers and eased toward a target — keep html from fighting it. */
     html.idr-smooth {
@@ -2231,8 +2209,8 @@
       display: flex;
       flex-direction: column;
     }
-    /* Covers the plate, image and copy so the whole card opens the product.
-       Sits above .shelf-copy (z-index 2); it goes to the same URL as View. */
+    /* Covers the image and copy so the whole card opens the product; it goes
+       to the same URL as the name link. */
     .shelf-hit {
       position: absolute;
       inset: 0;
@@ -2297,91 +2275,53 @@
       opacity: 0;
     }
 
-    /* Shelf media is visible immediately — no loom-curtain entrance. */
-    #shop .shelf-media.reveal-media {
-      opacity: 1;
-      transform: none;
-      transition: none;
-    }
-
-    #shop .shelf-media.reveal-media::before,
-    #shop .shelf-media.reveal-media::after { display: none; }
-
-    /* The copy rides on the photograph, carried by a scrim that fades out by
-       mid-image so the weave stays the thing you look at. */
+    /* Copy sits under the photograph (Armadillo-style): no scrim over the rug.
+       Line 1 name + collection, line 2 price. */
     .shelf-copy {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 2;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      padding: 70px 22px 20px;
-      background: linear-gradient(
-        to top,
-        rgba(31, 30, 22, 0.84) 0%,
-        rgba(31, 30, 22, 0.54) 44%,
-        rgba(31, 30, 22, 0) 100%
-      );
+      gap: 6px;
+      padding: 16px 0 0;
     }
 
     .shelf-name {
-      font-family: 'Cormorant Garamond', serif;
+      font-family: 'Manrope', 'Helvetica Neue', Arial, sans-serif;
       font-weight: 600;
-      font-size: clamp(17px, 1.35vw, 21px);
-      letter-spacing: -0.01em;
-      line-height: 1.2;
-      color: var(--idr-ivory);
-      margin: 0 0 8px;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      line-height: 1.4;
+      text-transform: uppercase;
+      color: var(--idr-charcoal);
+      margin: 0;
+    }
+
+    .shelf-name a {
+      color: inherit;
+      text-decoration: none;
     }
 
     .shelf-meta {
-      font-size: 12px;
-      line-height: 1.5;
-      color: var(--idr-ivory-70);
-      opacity: 1;
-      margin: 0 0 4px;
+      margin-left: 10px;
+      font-weight: 500;
+      color: var(--idr-taupe-ink);
     }
 
     .shelf-price {
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-      color: var(--idr-ivory);
-      opacity: 0.9;
-      margin: 0 0 14px;
-    }
-
-    .shelf-cta {
       font-size: 11px;
-      letter-spacing: 0.28em;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      line-height: 1.4;
       text-transform: uppercase;
-      color: var(--idr-ivory);
-      border-bottom: 1px solid var(--idr-ivory-40);
-      padding-bottom: 4px;
-      transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-      align-self: flex-start;
+      color: var(--idr-taupe-ink);
+      margin: 0;
     }
-
-    .shelf-copy .shelf-name,
-    .shelf-copy .shelf-meta,
-    .shelf-copy .shelf-price {
-      text-shadow: 0 1px 14px rgba(0, 0, 0, 0.4);
-    }
-
-    /* The min-heights below line copy up across a row; inside a bottom-anchored
-       overlay they would only pad the scrim taller. */
-    .shelf-copy .shelf-name,
-    .shelf-copy .shelf-meta { min-height: 0; }
 
     /* Name only on the closing card, underlined so it still reads as the way
        through to the rest of the catalogue. */
     .shelf-end .shelf-copy .shelf-name {
-      margin: 0;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--idr-ivory-40);
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(37, 37, 34, 0.4);
       transition: border-color 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
@@ -2551,11 +2491,8 @@
       .shelf-card:hover .shelf-media img.shelf-img-hover {
         opacity: 1;
       }
-      .shelf-card:not(.shelf-end):hover .shelf-cta {
-        opacity: 0.7;
-      }
       .shelf-end:hover .shelf-copy .shelf-name {
-        border-bottom-color: var(--idr-ivory);
+        border-bottom-color: var(--idr-charcoal);
       }
     }
 
@@ -2582,7 +2519,6 @@
         display: flex;
         flex-direction: column;
       }
-      .shelf-cta { margin-top: auto; }
     }
 
     /* Tablet — two across; shared insets with story section below. */
@@ -2602,36 +2538,9 @@
         margin-bottom: 10px;
         padding-bottom: 8px;
       }
-      .shelf-copy {
-        padding: 52px 14px 16px;
-        background: linear-gradient(
-          to top,
-          rgba(31, 30, 22, 0.9) 0%,
-          rgba(31, 30, 22, 0.58) 48%,
-          rgba(31, 30, 22, 0) 100%
-        );
-      }
-      .shelf-copy .shelf-name {
-        font-size: clamp(17px, 3.8vw, 22px);
-        line-height: 1.18;
-        margin: 0 0 5px;
-        min-height: 0;
-      }
-      .shelf-copy .shelf-meta {
-        font-size: 10px;
-        line-height: 1.4;
-        margin: 0 0 3px;
-        min-height: 0;
-      }
-      .shelf-copy .shelf-price {
-        font-size: 10px;
-        margin: 0 0 10px;
-      }
-      .shelf-copy .shelf-cta {
-        font-size: 9px;
-        letter-spacing: 0.24em;
-        padding-bottom: 3px;
-      }
+      .shelf-copy { padding-top: 12px; gap: 4px; }
+      .shelf-copy .shelf-name { font-size: 11px; letter-spacing: 0.1em; }
+      .shelf-copy .shelf-price { font-size: 10px; letter-spacing: 0.1em; }
       #story { padding: 48px 32px 64px !important; --story-inset: 32px; }
       .shelf { padding-bottom: 48px !important; }
       .shelf-intro { padding: 36px var(--shelf-inset) 40px !important; }
@@ -2657,31 +2566,10 @@
         margin-bottom: 8px;
         padding-bottom: 6px;
       }
-      .shelf-copy {
-        padding: 40px 10px 12px;
-      }
-      .shelf-copy .shelf-name {
-        font-size: clamp(15px, 4.6vw, 19px);
-        line-height: 1.15;
-        margin: 0 0 4px;
-      }
-      .shelf-copy .shelf-meta {
-        font-size: 9px;
-        line-height: 1.35;
-        letter-spacing: 0.02em;
-      }
-      .shelf-copy .shelf-price {
-        font-size: 9px;
-        margin: 0 0 8px;
-      }
-      .shelf-copy .shelf-cta {
-        font-size: 8px;
-        letter-spacing: 0.2em;
-      }
-      .shelf-end .shelf-copy .shelf-name {
-        font-size: clamp(16px, 4.8vw, 20px);
-        padding-bottom: 6px;
-      }
+      .shelf-copy { padding-top: 10px; }
+      .shelf-copy .shelf-name { font-size: 10px; letter-spacing: 0.08em; }
+      .shelf-copy .shelf-meta { margin-left: 6px; }
+      .shelf-copy .shelf-price { font-size: 9px; letter-spacing: 0.08em; }
       #story { padding: 32px 20px 56px !important; --story-inset: 20px; }
     }
 
@@ -4969,24 +4857,27 @@ class Component extends DCLogic {
     );
 
     const shelfProducts = products.slice(0, 3);
+    // "Anfa · enquire for size" -> "Anfa"
+    const collectionOf = (p) => String(p.note || '').split('·')[0].trim();
 
     const productCards = shelfProducts.map((p, i) => {
       return h('article', {
         key: i,
         className: 'shelf-card',
       },
-        // Whole-card click target. The visible View link stays the keyboard
-        // and screen-reader route, so this duplicate is hidden from both.
+        // Whole-card click target. The name link stays the keyboard and
+        // screen-reader route, so this duplicate is hidden from both.
         h('a', { href: './Product.dc.html?id=' + p.id, className: 'shelf-hit', tabIndex: -1, 'aria-hidden': 'true' }),
-        h('div', { className: 'shelf-media reveal-media', style: { '--r': (i * 140) + 'ms' } },
+        h('div', { className: 'shelf-media' },
           h('img', { className: 'shelf-img-default', src: p.image, alt: p.name, loading: i > 2 ? 'lazy' : 'eager' }),
-          p.hoverImage ? h('img', { className: 'shelf-img-hover', src: p.hoverImage, alt: '', loading: 'lazy', 'aria-hidden': 'true' }) : null,
-          h('div', { className: 'shelf-copy' },
-            h('h3', { className: 'shelf-name' }, p.name),
-            h('p', { className: 'shelf-meta' }, p.note),
-            h('p', { className: 'shelf-price' }, p.price),
-            h('a', { href: './Product.dc.html?id=' + p.id, className: 'shelf-cta', 'data-i18n': 'shop.view' }, 'View')
-          )
+          p.hoverImage ? h('img', { className: 'shelf-img-hover', src: p.hoverImage, alt: '', loading: 'lazy', 'aria-hidden': 'true' }) : null
+        ),
+        h('div', { className: 'shelf-copy' },
+          h('h3', { className: 'shelf-name' },
+            h('a', { href: './Product.dc.html?id=' + p.id }, p.name),
+            collectionOf(p) ? h('span', { className: 'shelf-meta' }, collectionOf(p)) : null
+          ),
+          h('p', { className: 'shelf-price' }, p.price)
         )
       );
     });
@@ -4996,20 +4887,17 @@ class Component extends DCLogic {
       className: 'shelf-card shelf-end',
       href: './Shop.dc.html',
     },
-      h('div', {
-        className: 'shelf-media reveal-media',
-        style: { '--r': (shelfProducts.length * 140) + 'ms' },
-      },
+      h('div', { className: 'shelf-media' },
         h('img', {
           src: './images/refs/collection-primary.jpg?v=20261003client',
           alt: '',
           loading: 'eager',
           fetchPriority: 'high',
           decoding: 'async',
-        }),
-        h('div', { className: 'shelf-copy' },
-          h('h3', { className: 'shelf-name', 'data-i18n': 'shop.shopAll' }, 'Collections')
-        )
+        })
+      ),
+      h('div', { className: 'shelf-copy' },
+        h('h3', { className: 'shelf-name', 'data-i18n': 'shop.shopAll' }, 'Collections')
       ),
     );
 

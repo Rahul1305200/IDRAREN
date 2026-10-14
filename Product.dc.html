@@ -353,6 +353,12 @@
       transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
       pointer-events: none;
     }
+    /* Main image + thumbnails fit on one screen beside the text, so nothing
+       sits below the fold. 256px = header, breadcrumb, thumbnail row, gaps. */
+    @media (min-width: 641px) {
+      .pdp-media { max-height: max(420px, calc(100svh - 256px)); }
+      .pdp-gallery-thumbs { justify-content: center; }
+    }
     .pdp-zoom-hint {
       position: absolute;
       left: 18px;

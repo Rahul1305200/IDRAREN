@@ -1129,11 +1129,10 @@
   // Ideal: not sparse (100–130px), not tight (40px) — Story's measured
   // clamp. Hero / sticky chrome keep their own spacing; only vertical
   // padding is forced so horizontal insets stay per-page.
-  // ── Stable images + fade-only reveals ──────────────────────────────────
-  // Root cause of “images jump on page change”:
-  // 1) load-time scale(1.04→1) Ken Burns on heroes
-  // 2) opacity/transform on the media FRAME (box felt like it popped)
-  // Fix: frames always occupy space; only the img fades; no entrance scale.
+  // ── No entrance effects ────────────────────────────────────────────────
+  // Client request: nothing fades, slides or scales in on any page. Every
+  // block, image and video is in place from the first paint, and changing
+  // a Shop category swaps content without a transition.
   function injectFadeOnlyReveal() {
     var css = document.getElementById('idr-fade-reveal-css');
     if (!css) {
@@ -1157,63 +1156,28 @@
       'max-width:none;',
       '}',
 
-      '@media (prefers-reduced-motion: no-preference){',
-      /* Text / cards: fade only */
-      '.reveal,.product-card .product-tile,',
-      '#story .story-copy .story-line,#story .story-head .story-line,',
-      '#who .who-line{',
-      'transform:none!important;',
-      '}',
-      '.reveal{',
-      'opacity:0;',
-      'transition:opacity 1.05s cubic-bezier(.22,1,.36,1)!important;',
-      'transition-delay:var(--r,0ms);',
-      'will-change:opacity;',
-      '}',
-      '.reveal.is-in{opacity:1!important;}',
-
-      /* Media frames stay laid out; the picture fades in inside. */
-      '.reveal-media{',
+      /* Scroll-reveal blocks, framed media, product cards, story lines and
+         the Shop category banner copy: visible and still from first paint. */
+      '.reveal,.reveal.is-in,.reveal-media,.reveal-media.is-in,',
+      '.reveal-media img:not(.shelf-img-hover),.reveal-media video,',
+      '.product-card .product-tile,',
+      '#story .story-copy .story-line,#story .story-head .story-line,#who .who-line,',
+      '.cat-hero-copy,',
+      '.cat-hero.is-swap .cat-hero-copy h1,.cat-hero.is-swap .cat-hero-copy p,.cat-hero.is-swap .cat-hero-cta{',
       'opacity:1!important;',
       'transform:none!important;',
+      'transition-delay:0s!important;',
       '}',
-      '.reveal-media img:not(.shelf-img-hover),.reveal-media video{',
-      'opacity:0;',
-      'transition:opacity 1.05s cubic-bezier(.22,1,.36,1)!important;',
-      'transition-delay:var(--r,0ms);',
-      '}',
-      '.reveal-media.is-in img:not(.shelf-img-hover),.reveal-media.is-in video{opacity:1!important;}',
-      /* Never force New Arrivals hover lifestyle shots visible by default. */
-      '.shelf-media img.shelf-img-hover,.reveal-media img.shelf-img-hover{opacity:0!important;}',
-      '#shop .shelf-media.reveal-media img.shelf-img-default,',
-      '#shop .shelf-end .shelf-media.reveal-media>img{',
-      'opacity:1!important;transition:opacity .55s ease!important;',
-      '}',
+
+      /* New Arrivals hover lifestyle shots stay hidden until hovered. */
+      '.shelf-media img.shelf-img-hover{opacity:0!important;}',
       '@media (hover:hover) and (pointer:fine){',
       '#shop .shelf-card:hover .shelf-media img.shelf-img-default{opacity:0!important;}',
       '#shop .shelf-card:hover .shelf-media img.shelf-img-hover{opacity:1!important;}',
       '}',
-
-      '.product-card .product-tile{',
-      'opacity:0;',
-      'transition:opacity .7s cubic-bezier(.22,1,.36,1)!important;',
-      '}',
-      '.product-card.is-in .product-tile{opacity:1!important;}',
-      '#story .story-copy .story-line,#story .story-head .story-line,#who .who-line{',
-      'opacity:0;',
-      'transition:opacity .95s cubic-bezier(.22,1,.36,1)!important;',
-      'transition-delay:0ms;',
-      '}',
-      '#story .story-copy.is-in .story-line,#story .story-head.is-in .story-line,',
-      '#who .reveal.is-in .who-line,#who .who-line.reveal.is-in{',
-      'opacity:1!important;',
-      'transition-delay:calc(160ms + var(--r,0ms));',
-      '}',
-      '}',
       '@media (prefers-reduced-motion:reduce){',
-      '.reveal,.reveal-media,.reveal-media img:not(.shelf-img-hover),.reveal-media video,',
-      '.product-card .product-tile{opacity:1!important;transform:none!important;transition:none!important;}',
-      '.shelf-media img.shelf-img-hover{opacity:0!important;}',
+      '#shop .shelf-card:hover .shelf-media img.shelf-img-default{opacity:1!important;}',
+      '#shop .shelf-card:hover .shelf-media img.shelf-img-hover{opacity:0!important;}',
       '}',
     ].join('');
   }
