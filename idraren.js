@@ -1610,19 +1610,12 @@
     }
 
     // Pin when the nav reaches the top of the viewport (sticky fallback).
-    // Use the anchor while pinned so un-pin is stable. Ignore a zero-scroll
-    // pre-layout glitch during the brand intro (hero.bottom can read <= 0
-    // before paint).
+    // Use the anchor while pinned so un-pin is stable. At zero scroll the nav
+    // sits under the full-height hero, so it never pins there: before layout
+    // settles the hero can measure 0px tall and the bar flashed over the film.
     function shouldPin() {
       var y = window.scrollY || document.documentElement.scrollTop || 0;
-      if (
-        y < 8 &&
-        (hero.classList.contains('hero-stone') ||
-          hero.classList.contains('hero-play') ||
-          hero.classList.contains('hero-reveal'))
-      ) {
-        return false;
-      }
+      if (y < 8) return false;
       if (pinned) {
         return anchor.getBoundingClientRect().top <= 0;
       }
