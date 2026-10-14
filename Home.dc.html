@@ -11,6 +11,7 @@
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="image" href="./images/hero-poster.jpg" fetchpriority="high">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="./images/refs/collection-primary.jpg?v=20261003client" fetchpriority="high">
   <style>
@@ -3185,9 +3186,9 @@
 
 <div style="background: var(--idr-stone); min-height: 100vh;">
 
-  <section id="hero" class="hero-stone" style="position: relative; height: 100vh; height: 100svh; min-height: 720px; overflow: hidden; background: var(--idr-dark);">
+  <section id="hero" class="hero-live" style="position: relative; height: 100vh; height: 100svh; min-height: 720px; overflow: hidden; background: var(--idr-dark);">
     <div class="hero-media" style="position: absolute; inset: 0; overflow: hidden;">
-      <video id="hero-video" data-src="./idraren-hero.mp4" muted loop playsinline webkit-playsinline preload="none" aria-label="Idraren rug film" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center"></video>
+      <video id="hero-video" src="./idraren-hero.mp4" poster="./images/hero-poster.jpg" autoplay muted loop playsinline webkit-playsinline preload="auto" aria-label="Idraren rug film" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center"></video>
     </div>
     <div class="hero-overlay" style="position: absolute; inset: 0; background: linear-gradient(180deg, var(--idr-dark-35) 0%, var(--idr-dark-10) 35%, var(--idr-dark-15) 60%, var(--idr-dark-70) 100%);"></div>
 
@@ -3602,9 +3603,10 @@ class Component extends DCLogic {
     }
     const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Play the opening film on every full page load / reload.
-    // Scroll stays free — the intro runs visually without locking the page.
-    const playIntro = !!hero && motionOk;
+    // Client request: no opening sequence. The hero video is on screen from
+    // the first paint (poster frame until it plays). The intro code below is
+    // kept so it can be switched back on.
+    const playIntro = false;
 
     const setIntroLock = () => {
       document.documentElement.classList.remove('hero-intro-lock');
