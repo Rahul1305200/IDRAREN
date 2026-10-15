@@ -94,7 +94,7 @@
     .shop-nav,
     .shop-utils {
       font-size: 12px;
-            text-transform: uppercase;
+      text-transform: uppercase;
       font-weight: 500;
       white-space: nowrap;
       /* Client: the menu line should read lighter. Matches .hero-nav on Home. */
@@ -1605,7 +1605,7 @@
        top padding already separates it from the index; the index's 64px
        bottom margin stacked on top of that into one 136px gap. */
     .phil-index.phil-index { margin-bottom: 0; }
-</style>
+  </style>
 </helmet>
 
 <div style="min-height: 100vh; background: var(--idr-stone);">
@@ -1738,7 +1738,7 @@
        paragraph is subdued to keep the quote itself dominant. -->
   <section class="story-quote-band band-dark lang-copy">
     <div class="reveal">
-      <p class="story-quote" data-i18n="story.quote">Every knot holds a name. My grandmother's hands are still in this wool.</p>
+        <p class="story-quote" data-i18n="story.quote">Every knot holds a name. My grandmother's hands are still in this wool.</p>
       <div class="story-quote-attr" data-i18n="story.quoteAttribution">Yasmina</div>
       <p class="story-p quote-support" data-i18n="storyPage.yasminaP1">Yasmina's family has kept the loom for four generations in the Middle Atlas. Motifs are remembered, not printed; wool is washed and spun close to home; colour comes from patience as much as pigment.</p>
       <div class="story-caption" data-i18n="story.caption">Yasmina, Middle Atlas. Third generation at the loom.</div>
@@ -1788,7 +1788,7 @@
       <div class="reveal">
         <div class="story-eyebrow" data-i18n="about.processEyebrow">Our process</div>
         <h2 class="story-h" data-i18n="about.processTitle">Learning to see the difference.</h2>
-      </div>
+    </div>
       <div class="reveal" style="--r: 100ms;">
       <p class="story-p" data-i18n="about.processP1">Over the years the family has built relationships with the finest artisans and weaving communities across the country. We have learned to look beyond what first meets the eye, to recognise the quiet language of a fine rug: the softness and strength of its wool, the depth of its natural dyes, the rhythm of its weave, the harmony of its design, and the human touch held in every knot.</p>
       <p class="story-p" data-i18n="about.processP2">Its real beauty is rarely there at first glance. It is revealed slowly, through touch, time and attention. Two rugs may look alike and carry entirely different souls, learning to see that difference is part of what was passed down to us.</p>
@@ -1803,7 +1803,7 @@
         <span data-i18n="storyPage.wideCaption">Made for mountain houses. At home in contemporary rooms.</span>
         <span class="meta" data-i18n="storyPage.galMeta1">Styled · Atlas wool</span>
       </p>
-    </div>
+      </div>
   </section>
 
   <!-- Philosophy · scannable four-up, then each pillar in full. Deliberately
@@ -1812,7 +1812,7 @@
     <div class="phil-head reveal">
       <div class="story-eyebrow" data-i18n="about.philEyebrow">Our philosophy</div>
       <h2 class="story-h" id="phil-title" data-i18n="about.philTitle">Four things we hold to.</h2>
-    </div>
+      </div>
 
     <ol class="phil-index reveal" style="--r: 60ms;">
       <li><a href="#phil-curated"><span class="phil-n">01</span><span class="phil-k" data-i18n="about.pill1">Curated</span><span class="phil-l" data-i18n="about.pill1Line">Chosen, never simply collected.</span></a></li>
@@ -2004,8 +2004,8 @@ class Component extends DCLogic {
           return; // allow navigation to Shop.dc.html
         }
         if (!shopItem.classList.contains('is-open')) {
-          e.preventDefault();
-          clearTimeout(this._shopCloseT);
+        e.preventDefault();
+        clearTimeout(this._shopCloseT);
           setOpen(true);
           return;
         }
