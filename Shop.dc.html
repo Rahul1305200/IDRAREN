@@ -859,23 +859,13 @@
       pointer-events: none;
       transition: background 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
+    /* Copy sits under the photograph on the stone background, like Home. */
     .product-copy {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 2;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      padding: 70px 22px 20px;
-      background: linear-gradient(
-        to top,
-        rgba(31, 30, 22, 0.84) 0%,
-        rgba(31, 30, 22, 0.54) 44%,
-        rgba(31, 30, 22, 0) 100%
-      );
-      pointer-events: none;
+      gap: 6px;
+      padding: 16px 0 0;
     }
     @media (hover: hover) and (pointer: fine) {
       /* Lighten the hovered piece so it reads as selected (no image swap). */
@@ -887,34 +877,34 @@
       }
     }
     .product-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(17px, 1.35vw, 21px);
+      font-family: 'Manrope', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 12px;
       font-weight: 600;
-      margin: 0 0 8px;
-      color: var(--idr-ivory);
-      letter-spacing: -0.01em;
-      line-height: 1.2;
-      text-shadow: 0 1px 14px rgba(0, 0, 0, 0.4);
+      margin: 0;
+      color: var(--idr-charcoal);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1.4;
     }
     .product-meta {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 4px;
-      font-size: 12px;
-      color: var(--idr-ivory-70);
-      line-height: 1.5;
-      text-shadow: 0 1px 14px rgba(0, 0, 0, 0.4);
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--idr-taupe-ink);
+      line-height: 1.4;
     }
     .product-price {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
-      letter-spacing: 0.04em;
-      text-transform: none;
-      color: var(--idr-ivory);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--idr-taupe-ink);
       margin: 0;
-      opacity: 0.9;
-      text-shadow: 0 1px 14px rgba(0, 0, 0, 0.4);
     }
     .product-view { display: none; }
 
@@ -2919,15 +2909,15 @@ class Component extends DCLogic {
           'data-order': String(i),
         },
           h('div', { className: 'product-media' },
-            h('img', { src: p.image, alt: p.name, loading: i > 1 ? 'lazy' : 'eager' }),
-            h('div', { className: 'product-copy' },
-              h('h2', { className: 'product-name' }, p.name),
-              h('div', { className: 'product-meta' },
-                h('span', null, p.note),
-                h('span', { className: 'product-price' }, p.price)
-              ),
-              h('span', { className: 'product-view', 'data-i18n': 'product.view' }, 'View piece')
-            )
+            h('img', { src: p.image, alt: p.name, loading: i > 1 ? 'lazy' : 'eager' })
+          ),
+          h('div', { className: 'product-copy' },
+            h('h2', { className: 'product-name' }, p.name),
+            h('div', { className: 'product-meta' },
+              h('span', null, p.note),
+              h('span', { className: 'product-price' }, p.price)
+            ),
+            h('span', { className: 'product-view', 'data-i18n': 'product.view' }, 'View piece')
           )
         )
       ))

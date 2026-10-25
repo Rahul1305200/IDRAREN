@@ -407,6 +407,15 @@
     var actionsEl = document.getElementById('saved-actions');
     var countEl = document.getElementById('saved-title-count');
     var items = Wishlist.all();
+    // Rugs saved from earlier versions of the site may no longer exist; they
+    // would render in the old format, so they are dropped from the list.
+    var current = items.filter(function (s) {
+      return RUG_CATALOG.some(function (c) { return c.id === s.id; });
+    });
+    if (current.length !== items.length) {
+      writeWishlist(current);
+      items = current;
+    }
     var lang = 'en';
     try {
       if (localStorage.getItem('idraren-lang') === 'fr') lang = 'fr';
@@ -428,7 +437,16 @@
     var sig = 'overlay1:' + items.length + ':' + items.map(function (p) { return p.id; }).join(',');
     if (listEl.getAttribute('data-idr-saved-sig') !== sig) {
       listEl.setAttribute('data-idr-saved-sig', sig);
-      listEl.innerHTML = items.map(function (p) {
+      listEl.innerHTML = items.map(function (saved) {
+        // Show the same piece the Home/Shop cards show: current catalogue
+        // image, name, price and size, not whatever was stored when it was saved.
+        var cat = null;
+        for (var ci = 0; ci < RUG_CATALOG.length; ci++) {
+          if (RUG_CATALOG[ci].id === saved.id) { cat = RUG_CATALOG[ci]; break; }
+        }
+        var p = cat
+          ? { id: cat.id, name: cat.name, image: cat.image, price: cat.price, note: cat.region + ' · ' + cat.size }
+          : saved;
         var href = './Product.dc.html?id=' + encodeURIComponent(p.id);
         var note = p.note ? normaliseSavedNote(p.note) : '';
         return '<div class="saved-item">' +
@@ -800,7 +818,7 @@
       'display:flex!important;align-items:center;gap:40px!important;',
       '}',
       '.hero-utils .utils-cluster,.shop-utils .utils-cluster{',
-      'display:inline-flex;align-items:center;gap:18px;',
+      'display:inline-flex;align-items:center;gap:40px;',
       '}',
       '.hero-utils .utils-cluster--links > a:not(.saved-link),',
       '.shop-utils .utils-cluster--links > a:not(.saved-link),',

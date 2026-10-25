@@ -2179,7 +2179,9 @@
 
     /* Yasmina — breath under the arrivals shelf. */
     #story {
-      padding-top: 56px !important;
+      /* Gap above the photo (shelf bottom padding + text leading = 64px, plus
+         this) equals the gap below it, so the block sits evenly. */
+      padding-top: max(0px, calc(clamp(56px, 6.2vw, 88px) - 64px)) !important;
       padding-bottom: clamp(56px, 6.2vw, 88px) !important;
     }
 
@@ -3627,10 +3629,8 @@ class Component extends DCLogic {
     }
     const motionOk = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Client request: no opening sequence. The hero video is on screen from
-    // the first paint (poster frame until it plays). The intro code below is
-    // kept so it can be switched back on.
-    const playIntro = false;
+    // Client request: logo first, then the video appears smoothly.
+    const playIntro = true;
 
     const setIntroLock = () => {
       document.documentElement.classList.remove('hero-intro-lock');
